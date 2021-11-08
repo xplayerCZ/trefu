@@ -1,1 +1,2 @@
-"# Trefu" 
+# Trefu
+Transit app for Android
