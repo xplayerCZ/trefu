@@ -1,17 +1,20 @@
 <resources>
     <string name="app_name">Trefu</string>
+    <string name="cd_open_navigation_drawer">Open navigation drawer</string>
 
     <!-- Home Screen -->
     <string name="home_title">Home</string>
 
-    <!-- Article Screen -->
-    <string name="article_published_in">Published in: %s</string>
+    <!-- Departures Screen -->
+    <string name="departures_title">Departures</string>
 
-    <!-- Interests Screen -->
-    <string name="interests_title">Interests</string>
+    <!-- Connections Screen -->
+    <string name="connections_title">Connections</string>
+
+    <!-- Timetables Screen -->
+    <string name="timetables_title">Timetables</string>
 
     <!-- Navigation actions -->
     <string name="cd_navigate_up">Navigate up</string>
     <string name="cd_navigate_home">Navigate to the home screen</string>
-    <string name="cd_navigate_interests">Navigate to the interests screen</string>
 </resources>

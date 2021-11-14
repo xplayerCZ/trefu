@@ -8,7 +8,9 @@ import androidx.navigation.NavHostController
  */
 object TrefuDestinations {
     const val HOME_ROUTE = "home"
-    const val INTERESTS_ROUTE = "interests"
+    const val DEPARTURES_ROUTE = "departures"
+    const val CONNECTIONS_ROUTE = "connections"
+    const val TIMETABLES_ROUTE = "timetables"
 }
 
 /**
@@ -30,8 +32,26 @@ class TrefuNavigationActions(navController: NavHostController) {
             restoreState = true
         }
     }
-    val navigateToInterests: () -> Unit = {
-        navController.navigate(TrefuDestinations.INTERESTS_ROUTE) {
+    val navigateToDepartures: () -> Unit = {
+        navController.navigate(TrefuDestinations.DEPARTURES_ROUTE) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    val navigateToConnections: () -> Unit = {
+        navController.navigate(TrefuDestinations.CONNECTIONS_ROUTE) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    val navigateToTimetables: () -> Unit = {
+        navController.navigate(TrefuDestinations.TIMETABLES_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }

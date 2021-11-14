@@ -4,7 +4,6 @@ import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.ui.theme.TrefuTheme
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,31 +18,28 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.ListAlt
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cz.davidkurzica.trefu.ui.components.NavigationIcon
-import cz.davidkurzica.trefu.ui.components.TrefuIcon
 
 @Composable
 fun AppDrawer(
     currentRoute: String,
     navigateToHome: () -> Unit,
-    navigateToInterests: () -> Unit,
+    navigateToDepartures: () -> Unit,
+    navigateToConnections: () -> Unit,
+    navigateToTimetables: () -> Unit,
     closeDrawer: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        TrefuLogo(Modifier.padding(16.dp))
         Divider(color = MaterialTheme.colors.onSurface.copy(alpha = .2f))
         DrawerButton(
             icon = Icons.Filled.Home,
@@ -56,26 +52,33 @@ fun AppDrawer(
         )
 
         DrawerButton(
-            icon = Icons.Filled.ListAlt,
-            label = stringResource(id = R.string.interests_title),
-            isSelected = currentRoute == TrefuDestinations.INTERESTS_ROUTE,
+            icon = Icons.Filled.DepartureBoard,
+            label = stringResource(id = R.string.departures_title),
+            isSelected = currentRoute == TrefuDestinations.DEPARTURES_ROUTE,
             action = {
-                navigateToInterests()
+                navigateToDepartures()
                 closeDrawer()
             }
         )
-    }
-}
 
-@Composable
-private fun TrefuLogo(modifier: Modifier = Modifier) {
-    Row(modifier = modifier) {
-        TrefuIcon()
-        Spacer(Modifier.width(8.dp))
-        Image(
-            painter = painterResource(R.drawable.ic_launcher_foreground),
-            contentDescription = stringResource(R.string.app_name),
-            colorFilter = ColorFilter.tint(MaterialTheme.colors.onSurface)
+        DrawerButton(
+            icon = Icons.Filled.AltRoute,
+            label = stringResource(id = R.string.connections_title),
+            isSelected = currentRoute == TrefuDestinations.CONNECTIONS_ROUTE,
+            action = {
+                navigateToConnections()
+                closeDrawer()
+            }
+        )
+
+        DrawerButton(
+            icon = Icons.Filled.Assignment,
+            label = stringResource(id = R.string.timetables_title),
+            isSelected = currentRoute == TrefuDestinations.TIMETABLES_ROUTE,
+            action = {
+                navigateToTimetables()
+                closeDrawer()
+            }
         )
     }
 }
@@ -143,8 +146,10 @@ fun PreviewAppDrawer() {
             AppDrawer(
                 currentRoute = TrefuDestinations.HOME_ROUTE,
                 navigateToHome = {},
-                navigateToInterests = {},
-                closeDrawer = { }
+                navigateToDepartures = {},
+                navigateToConnections = {},
+                navigateToTimetables = {},
+                closeDrawer = {}
             )
         }
     }
