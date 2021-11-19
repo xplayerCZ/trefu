@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun TrefuApp() {
-    TrefuTheme {
+    TrefuTheme(darkTheme = false) {
             val navController = rememberNavController()
             val navigationActions = remember(navController) {
                 TrefuNavigationActions(navController)

@@ -1,15 +1,15 @@
-package cz.davidkurzica.trefu.ui.home
+package cz.davidkurzica.trefu.ui.departures
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 
 @Composable
-fun HomeRoute(
+fun DeparturesRoute(
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState = rememberScaffoldState()
 ) {
-    HomeScreen(
+    DeparturesScreen(
         openDrawer = openDrawer,
         scaffoldState = scaffoldState
     )

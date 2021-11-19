@@ -4,4 +4,9 @@
     <style name="Theme.Trefu" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">@color/purple_700</item>
     </style>
+
+    <!-- This style is being removed when TimePicker composable is added to Jetpack Compose -->
+    <style name="TimePicker" parent="android:Widget.Material.TimePicker">
+        <item name="android:headerBackground">@color/purple_700</item>
+    </style>
 </resources>

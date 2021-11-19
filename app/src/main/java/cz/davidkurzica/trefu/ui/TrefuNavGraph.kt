@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import cz.davidkurzica.trefu.ui.departures.DeparturesRoute
 import cz.davidkurzica.trefu.ui.home.HomeRoute
 
 @Composable
@@ -24,7 +25,7 @@ fun TrefuNavGraph(
             HomeRoute(openDrawer = openDrawer)
         }
         composable(TrefuDestinations.DEPARTURES_ROUTE) {
-
+            DeparturesRoute(openDrawer = openDrawer)
         }
         composable(TrefuDestinations.CONNECTIONS_ROUTE) {
 
