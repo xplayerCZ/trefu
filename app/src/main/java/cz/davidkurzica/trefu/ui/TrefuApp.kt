@@ -7,11 +7,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import cz.davidkurzica.trefu.data.AppContainer
 import cz.davidkurzica.trefu.ui.theme.TrefuTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fun TrefuApp() {
+fun TrefuApp(
+    appContainer: AppContainer,
+) {
     TrefuTheme(darkTheme = false) {
             val navController = rememberNavController()
             val navigationActions = remember(navController) {
@@ -45,6 +48,7 @@ fun TrefuApp() {
                         .fillMaxSize()
                 ) {
                     TrefuNavGraph(
+                        appContainer = appContainer,
                         navController = navController,
                         openDrawer = { coroutineScope.launch { drawerState.open() } }
                     )

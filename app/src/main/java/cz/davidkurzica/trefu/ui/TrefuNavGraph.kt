@@ -2,15 +2,19 @@ package cz.davidkurzica.trefu.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import cz.davidkurzica.trefu.data.AppContainer
 import cz.davidkurzica.trefu.ui.departures.DeparturesRoute
+import cz.davidkurzica.trefu.ui.departures.DeparturesViewModel
 import cz.davidkurzica.trefu.ui.home.HomeRoute
 
 @Composable
 fun TrefuNavGraph(
+    appContainer: AppContainer,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     openDrawer: () -> Unit = {},
@@ -25,7 +29,14 @@ fun TrefuNavGraph(
             HomeRoute(openDrawer = openDrawer)
         }
         composable(TrefuDestinations.DEPARTURES_ROUTE) {
-            DeparturesRoute(openDrawer = openDrawer)
+            val departuresViewModel: DeparturesViewModel = viewModel(
+                factory = DeparturesViewModel.provideFactory(appContainer.departuresService, appContainer.trackService)
+            )
+
+            DeparturesRoute(
+                departuresViewModel = departuresViewModel,
+                openDrawer = openDrawer
+            )
         }
         composable(TrefuDestinations.CONNECTIONS_ROUTE) {
 

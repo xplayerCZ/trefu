@@ -17,4 +17,7 @@
     <!-- Navigation actions -->
     <string name="cd_navigate_up">Navigate up</string>
     <string name="cd_navigate_home">Navigate to the home screen</string>
+    <string name="load_error">Error during loading</string>
+    <string name="home_tap_to_load_content">bruh</string>
+    <string name="retry">Try again</string>
 </resources>
