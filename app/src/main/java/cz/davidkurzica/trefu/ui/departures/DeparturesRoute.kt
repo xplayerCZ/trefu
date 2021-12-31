@@ -6,9 +6,8 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import cz.davidkurzica.trefu.model.DeparturesForm
+import cz.davidkurzica.trefu.model.Track
 import org.joda.time.LocalTime
-import java.util.*
 
 @Composable
 fun DeparturesRoute(
@@ -20,8 +19,9 @@ fun DeparturesRoute(
 
     DeparturesRoute(
         uiState = uiState,
-        onSubmitForm = { stopId, timeId -> departuresViewModel.submitForm(stopId, timeId) },
-        onCleanForm = { departuresViewModel.cleanForm() },
+        onFormSubmit = { stopId, timeId -> departuresViewModel.submitForm(stopId, timeId) },
+        onFormUpdate = { departuresViewModel.updateForm(it) },
+        onFormClean = { departuresViewModel.cleanForm() },
         onErrorDismiss = { departuresViewModel.errorShown(it) },
         onCloseResults = { departuresViewModel.closeResults() },
         openDrawer = openDrawer,
@@ -32,8 +32,9 @@ fun DeparturesRoute(
 @Composable
 fun DeparturesRoute(
     uiState: DeparturesUiState,
-    onSubmitForm: (Int, LocalTime) -> Unit,
-    onCleanForm: () -> Unit,
+    onFormSubmit: (Int, LocalTime) -> Unit,
+    onFormClean: () -> Unit,
+    onFormUpdate: (Track) -> Unit,
     onErrorDismiss: (Long) -> Unit,
     onCloseResults: () -> Unit,
     openDrawer: () -> Unit,
@@ -43,9 +44,10 @@ fun DeparturesRoute(
     when (departuresScreenType) {
         DeparturesScreenType.Form -> {
             FormScreen(
-                uiState = uiState,
-                onSubmitForm = onSubmitForm,
-                onCleanForm = onCleanForm,
+                uiState = uiState as DeparturesUiState.Form,
+                onFormSubmit = onFormSubmit,
+                onFormClean = onFormClean,
+                onFormUpdate = onFormUpdate,
                 onErrorDismiss = onErrorDismiss,
                 openDrawer = openDrawer,
                 scaffoldState = scaffoldState,
@@ -53,7 +55,7 @@ fun DeparturesRoute(
         }
         DeparturesScreenType.Results -> {
             ResultsScreen(
-                uiState = uiState,
+                uiState = uiState as DeparturesUiState.Results,
                 onErrorDismiss = onErrorDismiss,
                 openDrawer = openDrawer,
                 scaffoldState = scaffoldState,

@@ -2,7 +2,6 @@ package cz.davidkurzica.trefu.ui.departures
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -12,75 +11,54 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.model.Departure
-import cz.davidkurzica.trefu.model.DeparturesForm
 import cz.davidkurzica.trefu.model.Track
 import cz.davidkurzica.trefu.ui.components.Time
 import cz.davidkurzica.trefu.ui.components.TrefuSnackbarHost
 import cz.davidkurzica.trefu.ui.components.TrefuTimePickerDialog
+import cz.davidkurzica.trefu.ui.theme.TrefuTheme
 import org.joda.time.LocalTime
-import java.util.*
+import java.time.format.TextStyle
 
 @Composable
 fun FormScreen(
-    uiState: DeparturesUiState,
-    onSubmitForm: (Int, LocalTime) -> Unit,
-    onCleanForm: () -> Unit,
+    uiState: DeparturesUiState.Form,
+    onFormSubmit: (Int, LocalTime) -> Unit,
+    onFormClean: () -> Unit,
+    onFormUpdate: (Track) -> Unit,
     onErrorDismiss: (Long) -> Unit,
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier
 ) {
-    when(uiState) {
-        is DeparturesUiState.HasDepartures -> {
-            val data = uiState.form
-            var selectedTrack by remember { mutableStateOf(data.trackOptions[0]) }
-            val title = stringResource(id = R.string.departures_title)
-
-            Scaffold(
-                scaffoldState = scaffoldState,
-                topBar = {
-                    DeparturesTopAppBar(
-                        title = title,
-                        openDrawer = openDrawer
-                    )
-                },
-                floatingActionButton = {
-                    FloatingActionButton(
-                        onClick = { onSubmitForm(selectedTrack.id, LocalTime.now()) },
-                        backgroundColor = MaterialTheme.colors.primary
-                    ) {
-                        Icon(Icons.Filled.Search, contentDescription = "Search for departures")
-                    }
-                }
-            ) { innerPadding ->
-                val screenModifier = Modifier.padding(innerPadding)
-
-                DeparturesForm(
-                    modifier = screenModifier,
-                    selectedTrack = selectedTrack,
-                    onSelectedTrackChange = { selectedTrack = it},
-                    options = data.trackOptions
-                )
-            }
-        }
-        is DeparturesUiState.NoDepartures -> {
-            Box(modifier.fillMaxSize()) { /* empty screen */ }
-        }
+    DeparturesScreenWithForm(
+        uiState = uiState,
+        onErrorDismiss = onErrorDismiss,
+        openDrawer = openDrawer,
+        scaffoldState = scaffoldState,
+        onFormSubmit = onFormSubmit,
+        modifier = modifier
+    ) { hasDataUiState, contentModifier ->
+        DeparturesForm(
+            modifier = contentModifier,
+            selectedTrack = hasDataUiState.selectedTrack,
+            onSelectedTrackChange = onFormUpdate,
+            options = hasDataUiState.tracks
+        )
     }
-
 }
 
 
 @Composable
 fun ResultsScreen(
-    uiState: DeparturesUiState,
+    uiState: DeparturesUiState.Results,
     openDrawer: () -> Unit,
     onErrorDismiss: (Long) -> Unit,
     scaffoldState: ScaffoldState,
@@ -103,13 +81,13 @@ fun ResultsScreen(
 
 @Composable
 private fun DeparturesScreenWithList(
-    uiState: DeparturesUiState,
+    uiState: DeparturesUiState.Results,
     onErrorDismiss: (Long) -> Unit,
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
     hasDeparturesContent: @Composable (
-        uiState: DeparturesUiState.HasDepartures,
+        uiState: DeparturesUiState.Results.HasResults,
         modifier: Modifier
     ) -> Unit
 ) {
@@ -129,22 +107,89 @@ private fun DeparturesScreenWithList(
 
         LoadingContent(
             empty = when (uiState) {
-                is DeparturesUiState.HasDepartures -> false
-                is DeparturesUiState.NoDepartures -> uiState.isLoading
+                is DeparturesUiState.Results.HasResults -> false
+                is DeparturesUiState.Results.NoResults -> uiState.isLoading
             },
             emptyContent = { FullScreenLoading() },
             loading = uiState.isLoading,
             onRefresh = { },
             content = {
                 when (uiState) {
-                    is DeparturesUiState.HasDepartures -> hasDeparturesContent(uiState, contentModifier)
-                    is DeparturesUiState.NoDepartures -> {
+                    is DeparturesUiState.Results.HasResults -> hasDeparturesContent(
+                        uiState,
+                        contentModifier
+                    )
+                    is DeparturesUiState.Results.NoResults -> {
                         Box(contentModifier.fillMaxSize()) { /* empty screen */ }
                     }
                 }
             }
         )
     }
+}
+
+@Composable
+private fun DeparturesScreenWithForm(
+    uiState: DeparturesUiState.Form,
+    onErrorDismiss: (Long) -> Unit,
+    onFormSubmit: (Int, LocalTime) -> Unit,
+    openDrawer: () -> Unit,
+    scaffoldState: ScaffoldState,
+    modifier: Modifier = Modifier,
+    hasDataContent: @Composable (
+        uiState: DeparturesUiState.Form.HasData,
+        modifier: Modifier
+    ) -> Unit
+) {
+    val title = stringResource(id = R.string.departures_title)
+
+    LoadingContent(
+        empty = when (uiState) {
+            is DeparturesUiState.Form.HasData -> false
+            is DeparturesUiState.Form.NoData -> uiState.isLoading
+        },
+        emptyContent = { FullScreenLoading() },
+        loading = uiState.isLoading,
+        onRefresh = { },
+        content = {
+            when (uiState) {
+                is DeparturesUiState.Form.HasData -> {
+                    Scaffold(
+                        scaffoldState = scaffoldState,
+                        topBar = {
+                            DeparturesTopAppBar(
+                                title = title,
+                                openDrawer = openDrawer
+                            )
+                        },
+                        floatingActionButton = {
+                            FloatingActionButton(
+                                onClick = {
+                                    onFormSubmit(
+                                        uiState.selectedTrack.id,
+                                        LocalTime.now()
+                                    )
+                                },
+                                backgroundColor = MaterialTheme.colors.primary
+                            ) {
+                                Icon(
+                                    Icons.Filled.Search,
+                                    contentDescription = "Search for departures"
+                                )
+                            }
+                        },
+                        modifier = modifier
+                    ) {
+                        hasDataContent(uiState, modifier)
+                    }
+                }
+                is DeparturesUiState.Form.NoData -> {
+                    Box(modifier.fillMaxSize()) { /* empty screen */ }
+                }
+            }
+        }
+    )
+
 }
 
 @Composable
@@ -177,7 +222,7 @@ fun DeparturesForm(
         modifier = modifier
             .padding(top = 12.dp)
             .fillMaxSize(),
-        contentAlignment = Alignment.TopCenter
+        contentAlignment = Alignment.Center
     ) {
         Column {
             DeparturesStopLocation(
@@ -195,7 +240,9 @@ fun DeparturesList(
     departures: List<Departure>
 ) {
     LazyColumn(
-        modifier = modifier
+        modifier = modifier,
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         itemsIndexed(items = departures) { _, item ->
             DepartureItem(departure = item)
@@ -207,19 +254,39 @@ fun DeparturesList(
 fun DepartureItem(
     departure: Departure
 ) {
-    Column {
-        Row {
-            Text(text = departure.time.toString("HH:mm"))
-            Text(text = departure.lineNumber.toString())
+    Card(
+        elevation = 4.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
+            Row {
+                Text(
+                    text = departure.time.toString("HH:mm"),
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.size(16.dp))
+                Text(
+                    text = departure.lineShortCode.toString(),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Text(
+                text = "konečná: ${departure.finalStop}",
+                fontSize = MaterialTheme.typography.caption.fontSize
+            )
         }
-        Text(text = departure.finalStop)
     }
 }
 
 @Preview("DepartureItem Preview")
 @Composable
 fun DepartureItemPreview() {
-    DepartureItem(departure = Departure(LocalTime.now(), 208,  "Malé Hoštice"))
+    TrefuTheme {
+        DepartureItem(departure = Departure(LocalTime(18, 30), 208, "Malé Hoštice"))
+    }
 }
 
 
@@ -240,11 +307,11 @@ fun DeparturesTime() {
     }
 
     if (openDialog.value) {
-      TrefuTimePickerDialog(
-          time = time,
-          onTimeSelected = setTime,
-          onDismissRequest = { openDialog.value = false }
-      )
+        TrefuTimePickerDialog(
+            time = time,
+            onTimeSelected = setTime,
+            onDismissRequest = { openDialog.value = false }
+        )
     }
 }
 
@@ -252,7 +319,7 @@ fun DeparturesTime() {
 @Composable
 fun DeparturesStopLocation(
     selectedTrack: Track,
-    onSelectedTrackChange:  (Track) -> Unit,
+    onSelectedTrackChange: (Track) -> Unit,
     options: List<Track>
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -280,28 +347,21 @@ fun DeparturesStopLocation(
                 expanded = false
             }
         ) {
-            LazyColumn {
-                itemsIndexed(items = options) { _, item ->
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp, 20.dp)
-                            .wrapContentSize(Alignment.Center)
-                    ) {
-                        DropdownMenuItem(
-                            onClick = {
-                                onSelectedTrackChange(item)
-                                expanded = false
-                            },
-                            enabled = item.enabled
-                        ) {
-                            Text(text = item.name)
-                        }
-                    }
+            options.forEach { item ->
+                DropdownMenuItem(
+                    onClick = {
+                        onSelectedTrackChange(item)
+                        expanded = false
+                    },
+                    enabled = item.enabled
+                ) {
+                    Text(text = item.name)
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun DeparturesTopAppBar(

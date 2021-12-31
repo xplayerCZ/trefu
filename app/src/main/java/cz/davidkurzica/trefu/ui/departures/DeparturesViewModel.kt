@@ -19,48 +19,86 @@ import java.util.*
 sealed interface DeparturesUiState {
 
     val isResultsOpen: Boolean
-    val isLoading: Boolean
     val errorMessages: List<ErrorMessage>
 
-    data class NoDepartures(
-        override val isResultsOpen: Boolean,
-        override val isLoading: Boolean,
-        override val errorMessages: List<ErrorMessage>,
-    ) : DeparturesUiState
+    sealed interface Form : DeparturesUiState {
+        val isLoading: Boolean
+
+        data class HasData(
+            val selectedTrack: Track,
+            val tracks: List<Track>,
+            override val isResultsOpen: Boolean,
+            override val isLoading: Boolean,
+            override val errorMessages: List<ErrorMessage>
+        ) : Form
+
+        data class NoData(
+            override val isResultsOpen: Boolean,
+            override val isLoading: Boolean,
+            override val errorMessages: List<ErrorMessage>
+        ) : Form
+    }
 
 
-    data class HasDepartures(
-        val form: DeparturesForm,
-        val departures: List<Departure>,
-        override val isResultsOpen: Boolean,
-        override val isLoading: Boolean,
-        override val errorMessages: List<ErrorMessage>,
-    ) : DeparturesUiState
+    sealed interface Results : DeparturesUiState {
+        val isLoading: Boolean
+
+        data class HasResults(
+            val departures: List<Departure>,
+            override val isResultsOpen: Boolean,
+            override val isLoading: Boolean,
+            override val errorMessages: List<ErrorMessage>,
+        ) : Results
+        data class NoResults(
+            override val isResultsOpen: Boolean,
+            override val isLoading: Boolean,
+            override val errorMessages: List<ErrorMessage>,
+        ) : Results
+    }
 }
 
 private data class DeparturesViewModelState(
-    val form: DeparturesForm? = null,
+    val selectedTrack: Track? = null,
+    val tracks: List<Track> = emptyList(),
     val departures: List<Departure> = emptyList(),
-    val isLoading: Boolean = false,
-    val isResultsOpen: Boolean = false,
+    val isFormLoading: Boolean = false,
+    val isResultsLoading: Boolean = false,
+    val showResults: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
 ) {
 
     fun toUiState(): DeparturesUiState =
-        if (form == null /* || departures.isEmpty() */) {
-            DeparturesUiState.NoDepartures(
-                isLoading = isLoading,
-                errorMessages = errorMessages,
-                isResultsOpen = isResultsOpen
-            )
+        if (!showResults) {
+            if(isFormLoading || tracks.isEmpty()) {
+                DeparturesUiState.Form.NoData(
+                    isResultsOpen = showResults,
+                    isLoading = isFormLoading,
+                    errorMessages = errorMessages
+                )
+            } else {
+                DeparturesUiState.Form.HasData(
+                    selectedTrack = selectedTrack ?: tracks[0],
+                    tracks = tracks,
+                    isResultsOpen = showResults,
+                    isLoading = isFormLoading,
+                    errorMessages = errorMessages
+                )
+            }
         } else {
-            DeparturesUiState.HasDepartures(
-                form = form,
-                departures = departures,
-                isLoading = isLoading,
-                errorMessages = errorMessages,
-                isResultsOpen = isResultsOpen
-            )
+            if(isResultsLoading) {
+                DeparturesUiState.Results.NoResults(
+                    isResultsOpen = showResults,
+                    isLoading = isFormLoading,
+                    errorMessages = errorMessages
+                )
+            } else {
+                DeparturesUiState.Results.HasResults(
+                    departures = departures,
+                    isResultsOpen = showResults,
+                    isLoading = isFormLoading,
+                    errorMessages = errorMessages
+                )
+            }
         }
 }
 
@@ -92,17 +130,19 @@ class DeparturesViewModel(
     }
 
     fun loadForm() {
+        viewModelState.update { it.copy(isFormLoading = true) }
+
         viewModelScope.launch {
             val result = Result.Success(trackService.getTracks()) as Result<List<Track>>
             viewModelState.update {
                 when (result) {
-                    is Result.Success -> it.copy(form = DeparturesForm(result.data), isLoading = false)
+                    is Result.Success -> it.copy(tracks = result.data, isFormLoading = false)
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
                             messageId = R.string.load_error
                         )
-                        it.copy(errorMessages = errorMessages, isLoading = false)
+                        it.copy(errorMessages = errorMessages, isFormLoading = false)
                     }
                 }
             }
@@ -110,19 +150,19 @@ class DeparturesViewModel(
     }
 
     fun submitForm(stopId: Int, time: LocalTime) {
-        viewModelState.update { it.copy(isResultsOpen = true, isLoading = true) }
+        viewModelState.update { it.copy(showResults = true, isResultsLoading = true) }
 
         viewModelScope.launch {
-            val result = departuresService.getDepartures(stopId, time)
+            val result = Result.Success(departuresService.getDepartures(stopId, time)) as Result<List<Departure>>
             viewModelState.update {
                 when (result) {
-                    is Result.Success -> it.copy(departures = result.data, isLoading = false)
+                    is Result.Success -> it.copy(departures = result.data, isResultsLoading = false)
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
                             messageId = R.string.load_error
                         )
-                        it.copy(errorMessages = errorMessages, isLoading = false)
+                        it.copy(errorMessages = errorMessages, isResultsLoading = false)
                     }
                 }
             }
@@ -134,7 +174,11 @@ class DeparturesViewModel(
     }
 
     fun closeResults() {
-        viewModelState.update { it.copy(isResultsOpen = false) }
+        viewModelState.update { it.copy(showResults = false) }
+    }
+
+    fun updateForm(track: Track) {
+        viewModelState.update { it.copy(selectedTrack = track) }
     }
 
 

@@ -4,10 +4,10 @@ import cz.davidkurzica.trefu.model.Departure
 import cz.davidkurzica.trefu.data.Result
 import org.joda.time.LocalTime
 import retrofit2.http.GET
-import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface DeparturesService {
 
-    @GET("departure?stopId={stopId}&time={time}")
-    suspend fun getDepartures(@Path("stopId") stopId: Int, @Path("time") time: LocalTime): Result<List<Departure>>
+    @GET("departure")
+    suspend fun getDepartures(@Query("stopId") stopId: Int, @Query("time") time: LocalTime): List<Departure>
 }
