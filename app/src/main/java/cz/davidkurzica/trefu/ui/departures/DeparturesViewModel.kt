@@ -8,12 +8,12 @@ import cz.davidkurzica.trefu.model.Departure
 import cz.davidkurzica.trefu.util.ErrorMessage
 import cz.davidkurzica.trefu.data.Result
 import cz.davidkurzica.trefu.data.departures.DeparturesService
-import cz.davidkurzica.trefu.data.tracks.TrackService
-import cz.davidkurzica.trefu.model.DeparturesForm
-import cz.davidkurzica.trefu.model.Track
+import cz.davidkurzica.trefu.data.tracks.StopService
+import cz.davidkurzica.trefu.model.Stop
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import org.joda.time.LocalTime
+import java.time.LocalDate
+import java.time.LocalTime
 import java.util.*
 
 sealed interface DeparturesUiState {
@@ -25,8 +25,8 @@ sealed interface DeparturesUiState {
         val isLoading: Boolean
 
         data class HasData(
-            val selectedTrack: Track,
-            val tracks: List<Track>,
+            val selectedStop: Stop,
+            val stops: List<Stop>,
             override val isResultsOpen: Boolean,
             override val isLoading: Boolean,
             override val errorMessages: List<ErrorMessage>
@@ -58,8 +58,8 @@ sealed interface DeparturesUiState {
 }
 
 private data class DeparturesViewModelState(
-    val selectedTrack: Track? = null,
-    val tracks: List<Track> = emptyList(),
+    val selectedStop: Stop? = null,
+    val stops: List<Stop> = emptyList(),
     val departures: List<Departure> = emptyList(),
     val isFormLoading: Boolean = false,
     val isResultsLoading: Boolean = false,
@@ -69,7 +69,7 @@ private data class DeparturesViewModelState(
 
     fun toUiState(): DeparturesUiState =
         if (!showResults) {
-            if(isFormLoading || tracks.isEmpty()) {
+            if(isFormLoading || stops.isEmpty()) {
                 DeparturesUiState.Form.NoData(
                     isResultsOpen = showResults,
                     isLoading = isFormLoading,
@@ -77,8 +77,8 @@ private data class DeparturesViewModelState(
                 )
             } else {
                 DeparturesUiState.Form.HasData(
-                    selectedTrack = selectedTrack ?: tracks[0],
-                    tracks = tracks,
+                    selectedStop = selectedStop ?: stops[0],
+                    stops = stops,
                     isResultsOpen = showResults,
                     isLoading = isFormLoading,
                     errorMessages = errorMessages
@@ -104,7 +104,7 @@ private data class DeparturesViewModelState(
 
 class DeparturesViewModel(
     private val departuresService: DeparturesService,
-    private val trackService: TrackService
+    private val stopService: StopService
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(DeparturesViewModelState())
@@ -133,10 +133,10 @@ class DeparturesViewModel(
         viewModelState.update { it.copy(isFormLoading = true) }
 
         viewModelScope.launch {
-            val result = Result.Success(trackService.getTracks()) as Result<List<Track>>
+            val result = Result.Success(stopService.getStops()) as Result<List<Stop>>
             viewModelState.update {
                 when (result) {
-                    is Result.Success -> it.copy(tracks = result.data, isFormLoading = false)
+                    is Result.Success -> it.copy(stops = result.data, isFormLoading = false)
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -149,11 +149,11 @@ class DeparturesViewModel(
         }
     }
 
-    fun submitForm(stopId: Int, time: LocalTime) {
+    fun submitForm(stopId: Int, time: LocalTime = LocalTime.now(), date: LocalDate = LocalDate.now()) {
         viewModelState.update { it.copy(showResults = true, isResultsLoading = true) }
 
         viewModelScope.launch {
-            val result = Result.Success(departuresService.getDepartures(stopId, time)) as Result<List<Departure>>
+            val result = Result.Success(departuresService.getDepartures(stopId, time, date)) as Result<List<Departure>>
             viewModelState.update {
                 when (result) {
                     is Result.Success -> it.copy(departures = result.data, isResultsLoading = false)
@@ -177,19 +177,19 @@ class DeparturesViewModel(
         viewModelState.update { it.copy(showResults = false) }
     }
 
-    fun updateForm(track: Track) {
-        viewModelState.update { it.copy(selectedTrack = track) }
+    fun updateForm(stop: Stop) {
+        viewModelState.update { it.copy(selectedStop = stop) }
     }
 
 
     companion object {
         fun provideFactory(
             departuresService: DeparturesService,
-            trackService: TrackService,
+            stopService: StopService,
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return DeparturesViewModel(departuresService, trackService) as T
+                return DeparturesViewModel(departuresService, stopService) as T
             }
         }
     }

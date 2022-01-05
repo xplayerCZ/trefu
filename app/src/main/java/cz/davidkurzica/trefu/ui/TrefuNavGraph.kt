@@ -30,7 +30,7 @@ fun TrefuNavGraph(
         }
         composable(TrefuDestinations.DEPARTURES_ROUTE) {
             val departuresViewModel: DeparturesViewModel = viewModel(
-                factory = DeparturesViewModel.provideFactory(appContainer.departuresService, appContainer.trackService)
+                factory = DeparturesViewModel.provideFactory(appContainer.departuresService, appContainer.stopService)
             )
 
             DeparturesRoute(

@@ -11,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -19,20 +18,20 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.model.Departure
-import cz.davidkurzica.trefu.model.Track
+import cz.davidkurzica.trefu.model.Stop
 import cz.davidkurzica.trefu.ui.components.Time
 import cz.davidkurzica.trefu.ui.components.TrefuSnackbarHost
 import cz.davidkurzica.trefu.ui.components.TrefuTimePickerDialog
 import cz.davidkurzica.trefu.ui.theme.TrefuTheme
-import org.joda.time.LocalTime
-import java.time.format.TextStyle
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun FormScreen(
     uiState: DeparturesUiState.Form,
     onFormSubmit: (Int, LocalTime) -> Unit,
     onFormClean: () -> Unit,
-    onFormUpdate: (Track) -> Unit,
+    onFormUpdate: (Stop) -> Unit,
     onErrorDismiss: (Long) -> Unit,
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState,
@@ -48,9 +47,9 @@ fun FormScreen(
     ) { hasDataUiState, contentModifier ->
         DeparturesForm(
             modifier = contentModifier,
-            selectedTrack = hasDataUiState.selectedTrack,
+            selectedStop = hasDataUiState.selectedStop,
             onSelectedTrackChange = onFormUpdate,
-            options = hasDataUiState.tracks
+            options = hasDataUiState.stops
         )
     }
 }
@@ -166,7 +165,7 @@ private fun DeparturesScreenWithForm(
                             FloatingActionButton(
                                 onClick = {
                                     onFormSubmit(
-                                        uiState.selectedTrack.id,
+                                        uiState.selectedStop.id,
                                         LocalTime.now()
                                     )
                                 },
@@ -189,7 +188,6 @@ private fun DeparturesScreenWithForm(
             }
         }
     )
-
 }
 
 @Composable
@@ -214,9 +212,9 @@ private fun LoadingContent(
 @Composable
 fun DeparturesForm(
     modifier: Modifier = Modifier,
-    options: List<Track>,
-    selectedTrack: Track,
-    onSelectedTrackChange: (Track) -> Unit
+    options: List<Stop>,
+    selectedStop: Stop,
+    onSelectedTrackChange: (Stop) -> Unit
 ) {
     Box(
         modifier = modifier
@@ -226,7 +224,7 @@ fun DeparturesForm(
     ) {
         Column {
             DeparturesStopLocation(
-                selectedTrack = selectedTrack,
+                selectedStop = selectedStop,
                 onSelectedTrackChange = onSelectedTrackChange,
                 options
             )
@@ -263,18 +261,19 @@ fun DepartureItem(
                 .fillMaxWidth()
         ) {
             Row {
+                val formatter = DateTimeFormatter.ofPattern("HH:mm")
                 Text(
-                    text = departure.time.toString("HH:mm"),
+                    text = formatter.format(departure.time),
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(Modifier.size(16.dp))
                 Text(
-                    text = departure.lineShortCode.toString(),
+                    text = departure.lineShortCode,
                     fontWeight = FontWeight.Bold
                 )
             }
             Text(
-                text = "konečná: ${departure.finalStop}",
+                text = "konečná: ${departure.lastStopName}",
                 fontSize = MaterialTheme.typography.caption.fontSize
             )
         }
@@ -285,7 +284,7 @@ fun DepartureItem(
 @Composable
 fun DepartureItemPreview() {
     TrefuTheme {
-        DepartureItem(departure = Departure(LocalTime(18, 30), 208, "Malé Hoštice"))
+        DepartureItem(departure = Departure(LocalTime.of(18, 30), "208", "Malé Hoštice"))
     }
 }
 
@@ -318,9 +317,9 @@ fun DeparturesTime() {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DeparturesStopLocation(
-    selectedTrack: Track,
-    onSelectedTrackChange: (Track) -> Unit,
-    options: List<Track>
+    selectedStop: Stop,
+    onSelectedTrackChange: (Stop) -> Unit,
+    options: List<Stop>
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -332,7 +331,7 @@ fun DeparturesStopLocation(
     ) {
         TextField(
             readOnly = true,
-            value = selectedTrack.name,
+            value = selectedStop.name,
             onValueChange = { },
             label = { Text("Label") },
             trailingIcon = {

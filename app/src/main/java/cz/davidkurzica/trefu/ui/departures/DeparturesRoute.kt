@@ -6,8 +6,8 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import cz.davidkurzica.trefu.model.Track
-import org.joda.time.LocalTime
+import cz.davidkurzica.trefu.model.Stop
+import java.time.LocalTime
 
 @Composable
 fun DeparturesRoute(
@@ -34,7 +34,7 @@ fun DeparturesRoute(
     uiState: DeparturesUiState,
     onFormSubmit: (Int, LocalTime) -> Unit,
     onFormClean: () -> Unit,
-    onFormUpdate: (Track) -> Unit,
+    onFormUpdate: (Stop) -> Unit,
     onErrorDismiss: (Long) -> Unit,
     onCloseResults: () -> Unit,
     openDrawer: () -> Unit,
