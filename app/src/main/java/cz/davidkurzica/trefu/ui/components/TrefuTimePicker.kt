@@ -6,27 +6,31 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 @Composable
-fun DeparturesTime() {
+fun TimeSelector(
+    time: LocalTime,
+    onTimeSelected: (LocalTime) -> Unit,
+) {
     val openDialog = remember { mutableStateOf(false) }
-    val (time, setTime) = remember { mutableStateOf(Time(12, 0)) }
 
     TextButton(
         onClick = { openDialog.value = true }
     ) {
-        val text = "%02d %02d".format(time.hours, time.minutes)
+        val formatter = DateTimeFormatter.ofPattern("HH:mm")
         Text(
-            text = text,
+            text = "Time: ${formatter.format(time)}",
             style = MaterialTheme.typography.button,
-            color = MaterialTheme.colors.primary
+            color = MaterialTheme.colors.onPrimary
         )
     }
 
     if (openDialog.value) {
         TrefuTimePickerDialog(
             time = time,
-            onTimeSelected = setTime,
+            onTimeSelected = onTimeSelected,
             onDismissRequest = { openDialog.value = false }
         )
     }

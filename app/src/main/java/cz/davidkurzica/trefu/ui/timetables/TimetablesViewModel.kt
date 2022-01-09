@@ -1,13 +1,13 @@
-package cz.davidkurzica.trefu.ui.departures
+package cz.davidkurzica.trefu.ui.timetables
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import cz.davidkurzica.trefu.R
-import cz.davidkurzica.trefu.model.DepartureWithLine
+import cz.davidkurzica.trefu.model.Timetable
 import cz.davidkurzica.trefu.util.ErrorMessage
 import cz.davidkurzica.trefu.data.Result
-import cz.davidkurzica.trefu.data.departures.DepartureService
+import cz.davidkurzica.trefu.data.timetables.TimetableService
 import cz.davidkurzica.trefu.data.tracks.StopService
 import cz.davidkurzica.trefu.model.Stop
 import kotlinx.coroutines.flow.*
@@ -16,12 +16,12 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.util.*
 
-sealed interface DeparturesUiState {
+sealed interface TimetablesUiState {
 
     val isResultsOpen: Boolean
     val errorMessages: List<ErrorMessage>
 
-    sealed interface Form : DeparturesUiState {
+    sealed interface Form : TimetablesUiState {
         val isLoading: Boolean
 
         data class HasData(
@@ -40,11 +40,11 @@ sealed interface DeparturesUiState {
     }
 
 
-    sealed interface Results : DeparturesUiState {
+    sealed interface Results : TimetablesUiState {
         val isLoading: Boolean
 
         data class HasResults(
-            val departureWithLines: List<DepartureWithLine>,
+            val timetables: Timetable,
             override val isResultsOpen: Boolean,
             override val isLoading: Boolean,
             override val errorMessages: List<ErrorMessage>,
@@ -57,26 +57,26 @@ sealed interface DeparturesUiState {
     }
 }
 
-private data class DeparturesViewModelState(
+private data class TimetablesViewModelState(
     val selectedStop: Stop? = null,
     val stops: List<Stop> = emptyList(),
-    val departureWithLines: List<DepartureWithLine> = emptyList(),
+    val timetables: Timetable? = null,
     val isFormLoading: Boolean = false,
     val isResultsLoading: Boolean = false,
     val showResults: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
 ) {
 
-    fun toUiState(): DeparturesUiState =
+    fun toUiState(): TimetablesUiState =
         if (!showResults) {
             if(isFormLoading || stops.isEmpty()) {
-                DeparturesUiState.Form.NoData(
+                TimetablesUiState.Form.NoData(
                     isResultsOpen = showResults,
                     isLoading = isFormLoading,
                     errorMessages = errorMessages
                 )
             } else {
-                DeparturesUiState.Form.HasData(
+                TimetablesUiState.Form.HasData(
                     selectedStop = selectedStop ?: stops[0],
                     stops = stops,
                     isResultsOpen = showResults,
@@ -85,15 +85,15 @@ private data class DeparturesViewModelState(
                 )
             }
         } else {
-            if(isResultsLoading) {
-                DeparturesUiState.Results.NoResults(
+            if(isResultsLoading || timetables == null) {
+                TimetablesUiState.Results.NoResults(
                     isResultsOpen = showResults,
                     isLoading = isFormLoading,
                     errorMessages = errorMessages
                 )
             } else {
-                DeparturesUiState.Results.HasResults(
-                    departureWithLines = departureWithLines,
+                TimetablesUiState.Results.HasResults(
+                    timetables = timetables,
                     isResultsOpen = showResults,
                     isLoading = isFormLoading,
                     errorMessages = errorMessages
@@ -102,12 +102,12 @@ private data class DeparturesViewModelState(
         }
 }
 
-class DeparturesViewModel(
-    private val departureService: DepartureService,
+class TimetablesViewModel(
+    private val timetableService: TimetableService,
     private val stopService: StopService
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(DeparturesViewModelState())
+    private val viewModelState = MutableStateFlow(TimetablesViewModelState())
 
     val uiState = viewModelState
         .map { it.toUiState() }
@@ -153,10 +153,10 @@ class DeparturesViewModel(
         viewModelState.update { it.copy(showResults = true, isResultsLoading = true) }
 
         viewModelScope.launch {
-            val result = Result.Success(departureService.getDepartures(stopId, time, date)) as Result<List<DepartureWithLine>>
+            val result = Result.Success(timetableService.getTimetable(stopId, time, date)) as Result<Timetable>
             viewModelState.update {
                 when (result) {
-                    is Result.Success -> it.copy(departureWithLines = result.data, isResultsLoading = false)
+                    is Result.Success -> it.copy(timetables = result.data, isResultsLoading = false)
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -184,12 +184,12 @@ class DeparturesViewModel(
 
     companion object {
         fun provideFactory(
-            departureService: DepartureService,
+            timetableService: TimetableService,
             stopService: StopService,
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return DeparturesViewModel(departureService, stopService) as T
+                return TimetablesViewModel(timetableService, stopService) as T
             }
         }
     }

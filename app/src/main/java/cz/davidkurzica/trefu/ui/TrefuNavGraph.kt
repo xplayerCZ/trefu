@@ -8,9 +8,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import cz.davidkurzica.trefu.data.AppContainer
+import cz.davidkurzica.trefu.ui.connections.ConnectionsRoute
+import cz.davidkurzica.trefu.ui.connections.ConnectionsViewModel
 import cz.davidkurzica.trefu.ui.departures.DeparturesRoute
 import cz.davidkurzica.trefu.ui.departures.DeparturesViewModel
 import cz.davidkurzica.trefu.ui.home.HomeRoute
+import cz.davidkurzica.trefu.ui.timetables.TimetablesRoute
+import cz.davidkurzica.trefu.ui.timetables.TimetablesViewModel
 
 @Composable
 fun TrefuNavGraph(
@@ -30,7 +34,7 @@ fun TrefuNavGraph(
         }
         composable(TrefuDestinations.DEPARTURES_ROUTE) {
             val departuresViewModel: DeparturesViewModel = viewModel(
-                factory = DeparturesViewModel.provideFactory(appContainer.departuresService, appContainer.stopService)
+                factory = DeparturesViewModel.provideFactory(appContainer.departureService, appContainer.stopService)
             )
 
             DeparturesRoute(
@@ -39,10 +43,24 @@ fun TrefuNavGraph(
             )
         }
         composable(TrefuDestinations.CONNECTIONS_ROUTE) {
+            val connectionsViewModel: ConnectionsViewModel = viewModel(
+                factory = ConnectionsViewModel.provideFactory(appContainer.connectionService, appContainer.stopService)
+            )
 
+            ConnectionsRoute(
+                connectionsViewModel = connectionsViewModel,
+                openDrawer = openDrawer
+            )
         }
         composable(TrefuDestinations.TIMETABLES_ROUTE) {
+            val timetablesViewModel: TimetablesViewModel = viewModel(
+                factory = TimetablesViewModel.provideFactory(appContainer.timetableService, appContainer.stopService)
+            )
 
+            TimetablesRoute(
+                timetablesViewModel = timetablesViewModel,
+                openDrawer = openDrawer
+            )
         }
     }
 }

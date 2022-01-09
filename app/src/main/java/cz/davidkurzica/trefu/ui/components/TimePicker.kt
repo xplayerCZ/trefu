@@ -18,16 +18,12 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.ui.theme.TrefuTheme
-
-class Time(
-    var hours: Int,
-    var minutes: Int,
-)
+import java.time.LocalTime
 
 @Composable
 fun TrefuTimePickerDialog(
-    time: Time,
-    onTimeSelected: (Time) -> Unit,
+    time: LocalTime,
+    onTimeSelected: (LocalTime) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
     Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties()) {
@@ -95,7 +91,7 @@ fun TrefuTimePickerDialog(
 }
 
 @Composable
-fun TimePickerDialog(time: Time, onTimeChanged: (Time) -> Unit) {
+fun TimePickerDialog(time: LocalTime, onTimeChanged: (LocalTime) -> Unit) {
     // Adds view to Compose
     AndroidView(
         modifier = Modifier.wrapContentSize(),
@@ -104,12 +100,12 @@ fun TimePickerDialog(time: Time, onTimeChanged: (Time) -> Unit) {
         },
         update = { view ->
             run {
-                view.hour = time.hours
-                view.minute = time.minutes
+                view.hour = time.hour
+                view.minute = time.minute
                 view.setIs24HourView(true)
                 view.setOnTimeChangedListener { _, hours, minutes ->
                     onTimeChanged(
-                        Time(
+                        LocalTime.of(
                             hours,
                             minutes
                         )
@@ -125,7 +121,7 @@ fun TimePickerDialog(time: Time, onTimeChanged: (Time) -> Unit) {
 fun TimePickerPreview() {
     TrefuTheme {
         Surface {
-            TrefuTimePickerDialog(onTimeSelected = { }, onDismissRequest = {}, time = Time(12, 24))
+            TrefuTimePickerDialog(onTimeSelected = { }, onDismissRequest = {}, time = LocalTime.of(12, 24))
         }
     }
 }

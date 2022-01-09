@@ -7,12 +7,15 @@
 
     <!-- Departures Screen -->
     <string name="departures_title">Departures</string>
+    <string name="cd_close_departures_results">Close departures results</string>
 
     <!-- Connections Screen -->
     <string name="connections_title">Connections</string>
+    <string name="cd_close_connections_results">Close connections results</string>
 
     <!-- Timetables Screen -->
     <string name="timetables_title">Timetables</string>
+    <string name="cd_close_timetables_results">Close timetables results</string>
 
     <!-- Navigation actions -->
     <string name="cd_navigate_up">Navigate up</string>
@@ -20,5 +23,4 @@
     <string name="load_error">Error during loading</string>
     <string name="home_tap_to_load_content">bruh</string>
     <string name="retry">Try again</string>
-    <string name="cd_close_departures_results">Close departures results</string>
 </resources>

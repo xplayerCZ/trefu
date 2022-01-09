@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.ui.departures
+package cz.davidkurzica.trefu.ui.timetables
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,17 +16,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import cz.davidkurzica.trefu.R
-import cz.davidkurzica.trefu.model.DepartureWithLine
+import cz.davidkurzica.trefu.model.DepartureSimple
+import cz.davidkurzica.trefu.model.Timetable
 import cz.davidkurzica.trefu.model.Stop
 import cz.davidkurzica.trefu.ui.components.FullScreenLoading
 import cz.davidkurzica.trefu.ui.components.TrefuSnackbarHost
 import cz.davidkurzica.trefu.ui.theme.TrefuTheme
+import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun FormScreen(
-    uiState: DeparturesUiState.Form,
+    uiState: TimetablesUiState.Form,
     onFormSubmit: (Int, LocalTime) -> Unit,
     onFormClean: () -> Unit,
     onFormUpdate: (Stop) -> Unit,
@@ -35,7 +37,7 @@ fun FormScreen(
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier
 ) {
-    DeparturesScreenWithForm(
+    TimetablesScreenWithForm(
         uiState = uiState,
         onErrorDismiss = onErrorDismiss,
         openDrawer = openDrawer,
@@ -43,7 +45,7 @@ fun FormScreen(
         onFormSubmit = onFormSubmit,
         modifier = modifier
     ) { hasDataUiState, contentModifier ->
-        DeparturesForm(
+        TimetablesForm(
             modifier = contentModifier,
             selectedStop = hasDataUiState.selectedStop,
             onSelectedTrackChange = onFormUpdate,
@@ -55,21 +57,21 @@ fun FormScreen(
 
 @Composable
 fun ResultsScreen(
-    uiState: DeparturesUiState.Results,
+    uiState: TimetablesUiState.Results,
     closeResults: () -> Unit,
     onErrorDismiss: (Long) -> Unit,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier
 ) {
-    DeparturesScreenWithList(
+    TimetablesScreenWithList(
         uiState = uiState,
         onErrorDismiss = onErrorDismiss,
         closeResults = closeResults,
         scaffoldState = scaffoldState,
         modifier = modifier
-    ) { hasDeparturesUiState, contentModifier ->
-        DeparturesList(
-            departureWithLines = hasDeparturesUiState.departureWithLines,
+    ) { hasTimetablesUiState, contentModifier ->
+        TimetablesList(
+            timetable = hasTimetablesUiState.timetables,
             modifier = contentModifier,
         )
     }
@@ -77,23 +79,23 @@ fun ResultsScreen(
 }
 
 @Composable
-private fun DeparturesScreenWithList(
-    uiState: DeparturesUiState.Results,
+private fun TimetablesScreenWithList(
+    uiState: TimetablesUiState.Results,
     onErrorDismiss: (Long) -> Unit,
     closeResults: () -> Unit,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
-    hasDeparturesContent: @Composable (
-        uiState: DeparturesUiState.Results.HasResults,
+    hasTimetablesContent: @Composable (
+        uiState: TimetablesUiState.Results.HasResults,
         modifier: Modifier
     ) -> Unit
 ) {
-    val title = stringResource(id = R.string.departures_title)
+    val title = stringResource(id = R.string.timetables_title)
     Scaffold(
         scaffoldState = scaffoldState,
         snackbarHost = { TrefuSnackbarHost(hostState = it) },
         topBar = {
-            DeparturesResultsTopAppBar(
+            TimetablesResultsTopAppBar(
                 title = title,
                 closeResults = closeResults,
             )
@@ -104,17 +106,17 @@ private fun DeparturesScreenWithList(
 
         LoadingContent(
             empty = when (uiState) {
-                is DeparturesUiState.Results.HasResults -> false
-                is DeparturesUiState.Results.NoResults -> uiState.isLoading
+                is TimetablesUiState.Results.HasResults -> false
+                is TimetablesUiState.Results.NoResults -> uiState.isLoading
             },
             emptyContent = { FullScreenLoading() },
             content = {
                 when (uiState) {
-                    is DeparturesUiState.Results.HasResults -> hasDeparturesContent(
+                    is TimetablesUiState.Results.HasResults -> hasTimetablesContent(
                         uiState,
                         contentModifier
                     )
-                    is DeparturesUiState.Results.NoResults -> {
+                    is TimetablesUiState.Results.NoResults -> {
                         Box(contentModifier.fillMaxSize()) { /* empty screen */ }
                     }
                 }
@@ -124,30 +126,30 @@ private fun DeparturesScreenWithList(
 }
 
 @Composable
-private fun DeparturesScreenWithForm(
-    uiState: DeparturesUiState.Form,
+private fun TimetablesScreenWithForm(
+    uiState: TimetablesUiState.Form,
     onErrorDismiss: (Long) -> Unit,
     onFormSubmit: (Int, LocalTime) -> Unit,
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
     hasDataContent: @Composable (
-        uiState: DeparturesUiState.Form.HasData,
+        uiState: TimetablesUiState.Form.HasData,
         modifier: Modifier
     ) -> Unit
 ) {
-    val title = stringResource(id = R.string.departures_title)
+    val title = stringResource(id = R.string.timetables_title)
 
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            DeparturesFormTopAppBar(
+            TimetablesFormTopAppBar(
                 title = title,
                 openDrawer = openDrawer
             )
         },
         floatingActionButton = {
-            if(uiState is DeparturesUiState.Form.HasData) {
+            if(uiState is TimetablesUiState.Form.HasData) {
                 FloatingActionButton(
                     onClick = {
                         onFormSubmit(
@@ -159,7 +161,7 @@ private fun DeparturesScreenWithForm(
                 ) {
                     Icon(
                         Icons.Filled.Search,
-                        contentDescription = "Search for departures"
+                        contentDescription = "Search for timetables"
                     )
                 }
             }
@@ -168,18 +170,18 @@ private fun DeparturesScreenWithForm(
     ) {
         LoadingContent(
             empty = when (uiState) {
-                is DeparturesUiState.Form.HasData -> false
-                is DeparturesUiState.Form.NoData -> uiState.isLoading
+                is TimetablesUiState.Form.HasData -> false
+                is TimetablesUiState.Form.NoData -> uiState.isLoading
             },
             emptyContent = { FullScreenLoading() },
             content = {
                 when (uiState) {
-                    is DeparturesUiState.Form.HasData -> {
+                    is TimetablesUiState.Form.HasData -> {
 
                         hasDataContent(uiState, modifier)
 
                     }
-                    is DeparturesUiState.Form.NoData -> {
+                    is TimetablesUiState.Form.NoData -> {
                         Box(modifier.fillMaxSize()) { /* empty screen */ }
                     }
                 }
@@ -202,7 +204,7 @@ private fun LoadingContent(
 }
 
 @Composable
-fun DeparturesForm(
+fun TimetablesForm(
     modifier: Modifier = Modifier,
     options: List<Stop>,
     selectedStop: Stop,
@@ -215,7 +217,7 @@ fun DeparturesForm(
         contentAlignment = Alignment.Center
     ) {
         Column {
-            DeparturesStopLocation(
+            TimetablesStopLocation(
                 selectedStop = selectedStop,
                 onSelectedTrackChange = onSelectedTrackChange,
                 options
@@ -225,24 +227,36 @@ fun DeparturesForm(
 }
 
 @Composable
-fun DeparturesList(
+fun TimetablesList(
     modifier: Modifier = Modifier,
-    departureWithLines: List<DepartureWithLine>
+    timetable: Timetable
 ) {
-    LazyColumn(
-        modifier = modifier,
-        contentPadding = PaddingValues(8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        itemsIndexed(items = departureWithLines) { _, item ->
-            DepartureItem(departureWithLine = item)
+    Column {
+        Row {
+            Text(
+                text = timetable.lineShortCode,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = timetable.date.toString(),
+                fontWeight = FontWeight.Bold
+            )
+        }
+        LazyColumn(
+            modifier = modifier,
+            contentPadding = PaddingValues(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            itemsIndexed(items = timetable.departures) { _, item ->
+                TimetableItem(timetable = item)
+            }
         }
     }
 }
 
 @Composable
-fun DepartureItem(
-    departureWithLine: DepartureWithLine
+fun TimetableItem(
+    timetable: DepartureSimple
 ) {
     Card(
         elevation = 4.dp
@@ -252,38 +266,33 @@ fun DepartureItem(
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            Row {
-                val formatter = DateTimeFormatter.ofPattern("HH:mm")
-                Text(
-                    text = formatter.format(departureWithLine.time),
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.size(16.dp))
-                Text(
-                    text = departureWithLine.lineShortCode,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            val formatter = DateTimeFormatter.ofPattern("HH:mm")
             Text(
-                text = "konečná: ${departureWithLine.stopName}",
+                text = formatter.format(timetable.time),
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "konečná: ${timetable.stopName}",
                 fontSize = MaterialTheme.typography.caption.fontSize
             )
         }
     }
 }
 
-@Preview("DepartureItem Preview")
+@Preview("TimetableItem Preview")
 @Composable
-fun DepartureItemPreview() {
+fun TimetableItemPreview() {
     TrefuTheme {
-        DepartureItem(departureWithLine = DepartureWithLine(LocalTime.of(18, 30), "208", "Malé Hoštice"))
+        TimetableItem(
+            DepartureSimple(LocalTime.now().plusMinutes(5), "end")
+        )
     }
 }
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun DeparturesStopLocation(
+fun TimetablesStopLocation(
     selectedStop: Stop,
     onSelectedTrackChange: (Stop) -> Unit,
     options: List<Stop>
@@ -330,7 +339,7 @@ fun DeparturesStopLocation(
 
 
 @Composable
-fun DeparturesFormTopAppBar(
+fun TimetablesFormTopAppBar(
     title: String,
     openDrawer: () -> Unit
 ) {
@@ -351,7 +360,7 @@ fun DeparturesFormTopAppBar(
 }
 
 @Composable
-fun DeparturesResultsTopAppBar(
+fun TimetablesResultsTopAppBar(
     title: String,
     closeResults: () -> Unit
 ) {
@@ -363,7 +372,7 @@ fun DeparturesResultsTopAppBar(
             IconButton(onClick = closeResults) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.cd_close_departures_results),
+                    contentDescription = stringResource(R.string.cd_close_timetables_results),
                 )
             }
         },

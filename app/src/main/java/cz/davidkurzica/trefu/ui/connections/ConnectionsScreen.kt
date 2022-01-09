@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.ui.departures
+package cz.davidkurzica.trefu.ui.connections
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,27 +15,27 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import cz.davidkurzica.trefu.R
-import cz.davidkurzica.trefu.model.DepartureWithLine
-import cz.davidkurzica.trefu.model.Stop
-import cz.davidkurzica.trefu.ui.components.FullScreenLoading
-import cz.davidkurzica.trefu.ui.components.TrefuSnackbarHost
+import cz.davidkurzica.trefu.model.*
+import cz.davidkurzica.trefu.ui.components.*
 import cz.davidkurzica.trefu.ui.theme.TrefuTheme
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun FormScreen(
-    uiState: DeparturesUiState.Form,
-    onFormSubmit: (Int, LocalTime) -> Unit,
+    uiState: ConnectionsUiState.Form,
+    onFormSubmit: (ConnectionsFormData) -> Unit,
     onFormClean: () -> Unit,
-    onFormUpdate: (Stop) -> Unit,
+    onFormUpdate: (ConnectionsFormData) -> Unit,
     onErrorDismiss: (Long) -> Unit,
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier
 ) {
-    DeparturesScreenWithForm(
+    ConnectionsScreenWithForm(
         uiState = uiState,
         onErrorDismiss = onErrorDismiss,
         openDrawer = openDrawer,
@@ -43,10 +43,10 @@ fun FormScreen(
         onFormSubmit = onFormSubmit,
         modifier = modifier
     ) { hasDataUiState, contentModifier ->
-        DeparturesForm(
+        ConnectionsForm(
             modifier = contentModifier,
-            selectedStop = hasDataUiState.selectedStop,
-            onSelectedTrackChange = onFormUpdate,
+            formData = hasDataUiState.formData,
+            onFormDataUpdate = onFormUpdate,
             options = hasDataUiState.stops
         )
     }
@@ -55,21 +55,21 @@ fun FormScreen(
 
 @Composable
 fun ResultsScreen(
-    uiState: DeparturesUiState.Results,
+    uiState: ConnectionsUiState.Results,
     closeResults: () -> Unit,
     onErrorDismiss: (Long) -> Unit,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier
 ) {
-    DeparturesScreenWithList(
+    ConnectionsScreenWithList(
         uiState = uiState,
         onErrorDismiss = onErrorDismiss,
         closeResults = closeResults,
         scaffoldState = scaffoldState,
         modifier = modifier
-    ) { hasDeparturesUiState, contentModifier ->
-        DeparturesList(
-            departureWithLines = hasDeparturesUiState.departureWithLines,
+    ) { hasConnectionsUiState, contentModifier ->
+        ConnectionsList(
+            connections = hasConnectionsUiState.connections,
             modifier = contentModifier,
         )
     }
@@ -77,23 +77,23 @@ fun ResultsScreen(
 }
 
 @Composable
-private fun DeparturesScreenWithList(
-    uiState: DeparturesUiState.Results,
+private fun ConnectionsScreenWithList(
+    uiState: ConnectionsUiState.Results,
     onErrorDismiss: (Long) -> Unit,
     closeResults: () -> Unit,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
-    hasDeparturesContent: @Composable (
-        uiState: DeparturesUiState.Results.HasResults,
+    hasConnectionsContent: @Composable (
+        uiState: ConnectionsUiState.Results.HasResults,
         modifier: Modifier
     ) -> Unit
 ) {
-    val title = stringResource(id = R.string.departures_title)
+    val title = stringResource(id = R.string.connections_title)
     Scaffold(
         scaffoldState = scaffoldState,
         snackbarHost = { TrefuSnackbarHost(hostState = it) },
         topBar = {
-            DeparturesResultsTopAppBar(
+            ConnectionsResultsTopAppBar(
                 title = title,
                 closeResults = closeResults,
             )
@@ -104,17 +104,17 @@ private fun DeparturesScreenWithList(
 
         LoadingContent(
             empty = when (uiState) {
-                is DeparturesUiState.Results.HasResults -> false
-                is DeparturesUiState.Results.NoResults -> uiState.isLoading
+                is ConnectionsUiState.Results.HasResults -> false
+                is ConnectionsUiState.Results.NoResults -> uiState.isLoading
             },
             emptyContent = { FullScreenLoading() },
             content = {
                 when (uiState) {
-                    is DeparturesUiState.Results.HasResults -> hasDeparturesContent(
+                    is ConnectionsUiState.Results.HasResults -> hasConnectionsContent(
                         uiState,
                         contentModifier
                     )
-                    is DeparturesUiState.Results.NoResults -> {
+                    is ConnectionsUiState.Results.NoResults -> {
                         Box(contentModifier.fillMaxSize()) { /* empty screen */ }
                     }
                 }
@@ -124,42 +124,39 @@ private fun DeparturesScreenWithList(
 }
 
 @Composable
-private fun DeparturesScreenWithForm(
-    uiState: DeparturesUiState.Form,
+private fun ConnectionsScreenWithForm(
+    uiState: ConnectionsUiState.Form,
     onErrorDismiss: (Long) -> Unit,
-    onFormSubmit: (Int, LocalTime) -> Unit,
+    onFormSubmit: (ConnectionsFormData) -> Unit,
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
     hasDataContent: @Composable (
-        uiState: DeparturesUiState.Form.HasData,
+        uiState: ConnectionsUiState.Form.HasData,
         modifier: Modifier
     ) -> Unit
 ) {
-    val title = stringResource(id = R.string.departures_title)
+    val title = stringResource(id = R.string.connections_title)
 
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            DeparturesFormTopAppBar(
+            ConnectionsFormTopAppBar(
                 title = title,
                 openDrawer = openDrawer
             )
         },
         floatingActionButton = {
-            if(uiState is DeparturesUiState.Form.HasData) {
+            if(uiState is ConnectionsUiState.Form.HasData) {
                 FloatingActionButton(
                     onClick = {
-                        onFormSubmit(
-                            uiState.selectedStop.id,
-                            LocalTime.now()
-                        )
+                        onFormSubmit(uiState.formData)
                     },
                     backgroundColor = MaterialTheme.colors.primary
                 ) {
                     Icon(
                         Icons.Filled.Search,
-                        contentDescription = "Search for departures"
+                        contentDescription = "Search for connections"
                     )
                 }
             }
@@ -168,18 +165,18 @@ private fun DeparturesScreenWithForm(
     ) {
         LoadingContent(
             empty = when (uiState) {
-                is DeparturesUiState.Form.HasData -> false
-                is DeparturesUiState.Form.NoData -> uiState.isLoading
+                is ConnectionsUiState.Form.HasData -> false
+                is ConnectionsUiState.Form.NoData -> uiState.isLoading
             },
             emptyContent = { FullScreenLoading() },
             content = {
                 when (uiState) {
-                    is DeparturesUiState.Form.HasData -> {
+                    is ConnectionsUiState.Form.HasData -> {
 
                         hasDataContent(uiState, modifier)
 
                     }
-                    is DeparturesUiState.Form.NoData -> {
+                    is ConnectionsUiState.Form.NoData -> {
                         Box(modifier.fillMaxSize()) { /* empty screen */ }
                     }
                 }
@@ -202,11 +199,11 @@ private fun LoadingContent(
 }
 
 @Composable
-fun DeparturesForm(
+fun ConnectionsForm(
     modifier: Modifier = Modifier,
     options: List<Stop>,
-    selectedStop: Stop,
-    onSelectedTrackChange: (Stop) -> Unit
+    formData: ConnectionsFormData,
+    onFormDataUpdate: (ConnectionsFormData) -> Unit
 ) {
     Box(
         modifier = modifier
@@ -215,34 +212,76 @@ fun DeparturesForm(
         contentAlignment = Alignment.Center
     ) {
         Column {
-            DeparturesStopLocation(
-                selectedStop = selectedStop,
-                onSelectedTrackChange = onSelectedTrackChange,
+            ConnectionsStopLocation(
+                selectedStop = formData.selectedStopFrom,
+                onSelectedTrackChange = { onFormDataUpdate(formData.copy(selectedStopFrom = it)) },
                 options
             )
+            TimeSelector(time = formData.selectedTimeFrom, onTimeSelected = { onFormDataUpdate(formData.copy(selectedTimeFrom = it)) })
+            Spacer(Modifier.size(32.dp))
+            ConnectionsStopLocation(
+                selectedStop = formData.selectedStopTo,
+                onSelectedTrackChange = { onFormDataUpdate(formData.copy(selectedStopTo = it)) },
+                options
+            )
+            TimeSelector(time = formData.selectedTimeTo, onTimeSelected = { onFormDataUpdate(formData.copy(selectedTimeTo = it)) })
         }
     }
 }
 
+/*
+@Preview("ConnectionsFormPreview")
 @Composable
-fun DeparturesList(
+fun ConnectionsFormPreview() {
+    val options = listOf(
+        Stop(1, "Albert", true),
+        Stop(2, "Englišova", true)
+    )
+
+    TrefuTheme(false) {
+        ConnectionsForm(
+            options = options,
+            selectedStop = options[0],
+            onSelectedTrackChange = { }
+        )
+    }
+}
+*/
+
+@Composable
+fun ConnectionsList(
     modifier: Modifier = Modifier,
-    departureWithLines: List<DepartureWithLine>
+    connections: List<Connection>
 ) {
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        itemsIndexed(items = departureWithLines) { _, item ->
-            DepartureItem(departureWithLine = item)
+        itemsIndexed(items = connections) { _, item ->
+            ConnectionItem(connection = item)
         }
     }
 }
 
 @Composable
-fun DepartureItem(
-    departureWithLine: DepartureWithLine
+fun ConnectionItem(
+    connection: Connection
+) {
+    Column {
+        connection.connectionsParts.forEach {
+            ConnectionSubItem(
+                it.to, it.from, it.lineShortCode
+            )
+        }
+    }
+}
+
+@Composable
+fun ConnectionSubItem(
+    to: DepartureSimple,
+    from: DepartureSimple,
+    lineShortCode: String
 ) {
     Card(
         elevation = 4.dp
@@ -252,38 +291,72 @@ fun DepartureItem(
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
+            val formatter = DateTimeFormatter.ofPattern("HH:mm")
+            Text(
+                text = lineShortCode,
+                fontWeight = FontWeight.Bold
+            )
             Row {
-                val formatter = DateTimeFormatter.ofPattern("HH:mm")
                 Text(
-                    text = formatter.format(departureWithLine.time),
-                    fontWeight = FontWeight.Bold
+                    text = formatter.format(from.time),
                 )
                 Spacer(Modifier.size(16.dp))
                 Text(
-                    text = departureWithLine.lineShortCode,
-                    fontWeight = FontWeight.Bold
+                    text = from.stopName,
                 )
             }
-            Text(
-                text = "konečná: ${departureWithLine.stopName}",
-                fontSize = MaterialTheme.typography.caption.fontSize
-            )
+            Row {
+                Text(
+                    text = formatter.format(to.time),
+                )
+                Spacer(Modifier.size(16.dp))
+                Text(
+                    text = to.stopName,
+                )
+            }
         }
     }
 }
 
-@Preview("DepartureItem Preview")
+@Preview("ConnectionItem Preview")
 @Composable
-fun DepartureItemPreview() {
+fun ConnectionItemPreview() {
     TrefuTheme {
-        DepartureItem(departureWithLine = DepartureWithLine(LocalTime.of(18, 30), "208", "Malé Hoštice"))
+        ConnectionItem(connection =
+            Connection(
+                listOf(
+                    ConnectionPart(
+                        lineShortCode = "208",
+                        from = DepartureSimple(
+                            LocalTime.of(10, 20),
+                            "start"
+                        ),
+                        to = DepartureSimple(
+                            LocalTime.of(10, 28),
+                            "end"
+                        )
+                    ),
+                    ConnectionPart(
+                        lineShortCode = "219",
+                        from = DepartureSimple(
+                            LocalTime.of(10, 29),
+                            "start"
+                        ),
+                        to = DepartureSimple(
+                            LocalTime.of(10, 41),
+                            "end"
+                        )
+                    )
+                )
+            )
+        )
     }
 }
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun DeparturesStopLocation(
+fun ConnectionsStopLocation(
     selectedStop: Stop,
     onSelectedTrackChange: (Stop) -> Unit,
     options: List<Stop>
@@ -330,7 +403,7 @@ fun DeparturesStopLocation(
 
 
 @Composable
-fun DeparturesFormTopAppBar(
+fun ConnectionsFormTopAppBar(
     title: String,
     openDrawer: () -> Unit
 ) {
@@ -351,7 +424,7 @@ fun DeparturesFormTopAppBar(
 }
 
 @Composable
-fun DeparturesResultsTopAppBar(
+fun ConnectionsResultsTopAppBar(
     title: String,
     closeResults: () -> Unit
 ) {
@@ -363,7 +436,7 @@ fun DeparturesResultsTopAppBar(
             IconButton(onClick = closeResults) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.cd_close_departures_results),
+                    contentDescription = stringResource(R.string.cd_close_connections_results),
                 )
             }
         },

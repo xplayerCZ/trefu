@@ -5,8 +5,15 @@ import kotlinx.serialization.Serializable
 import java.time.LocalTime
 
 @Serializable
-data class Departure(
+data class DepartureWithLine(
     val time: @Serializable(with = LocalTimeSerializer::class) LocalTime,
     val lineShortCode: String,
-    val lastStopName: String,
+    val stopName: String,
 )
+
+@Serializable
+data class DepartureSimple(
+    val time: @Serializable(with = LocalTimeSerializer::class) LocalTime,
+    val stopName: String,
+)
+
