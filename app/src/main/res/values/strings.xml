@@ -20,4 +20,5 @@
     <string name="load_error">Error during loading</string>
     <string name="home_tap_to_load_content">bruh</string>
     <string name="retry">Try again</string>
+    <string name="cd_close_departures_results">Close departures results</string>
 </resources>

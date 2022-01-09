@@ -93,7 +93,7 @@ private fun DrawerButton(
 ) {
     val colors = MaterialTheme.colors
     val textIconColor = if (isSelected) {
-        colors.primary
+        colors.onPrimary
     } else {
         colors.onSurface.copy(alpha = 0.6f)
     }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
@@ -19,6 +20,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.model.Departure
 import cz.davidkurzica.trefu.model.Stop
+import cz.davidkurzica.trefu.ui.components.FullScreenLoading
 import cz.davidkurzica.trefu.ui.components.Time
 import cz.davidkurzica.trefu.ui.components.TrefuSnackbarHost
 import cz.davidkurzica.trefu.ui.components.TrefuTimePickerDialog
@@ -58,7 +60,7 @@ fun FormScreen(
 @Composable
 fun ResultsScreen(
     uiState: DeparturesUiState.Results,
-    openDrawer: () -> Unit,
+    closeResults: () -> Unit,
     onErrorDismiss: (Long) -> Unit,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier
@@ -66,7 +68,7 @@ fun ResultsScreen(
     DeparturesScreenWithList(
         uiState = uiState,
         onErrorDismiss = onErrorDismiss,
-        openDrawer = openDrawer,
+        closeResults = closeResults,
         scaffoldState = scaffoldState,
         modifier = modifier
     ) { hasDeparturesUiState, contentModifier ->
@@ -82,7 +84,7 @@ fun ResultsScreen(
 private fun DeparturesScreenWithList(
     uiState: DeparturesUiState.Results,
     onErrorDismiss: (Long) -> Unit,
-    openDrawer: () -> Unit,
+    closeResults: () -> Unit,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
     hasDeparturesContent: @Composable (
@@ -95,9 +97,9 @@ private fun DeparturesScreenWithList(
         scaffoldState = scaffoldState,
         snackbarHost = { TrefuSnackbarHost(hostState = it) },
         topBar = {
-            DeparturesTopAppBar(
+            DeparturesResultsTopAppBar(
                 title = title,
-                openDrawer = openDrawer,
+                closeResults = closeResults,
             )
         },
         modifier = modifier
@@ -110,8 +112,6 @@ private fun DeparturesScreenWithList(
                 is DeparturesUiState.Results.NoResults -> uiState.isLoading
             },
             emptyContent = { FullScreenLoading() },
-            loading = uiState.isLoading,
-            onRefresh = { },
             content = {
                 when (uiState) {
                     is DeparturesUiState.Results.HasResults -> hasDeparturesContent(
@@ -142,70 +142,66 @@ private fun DeparturesScreenWithForm(
 ) {
     val title = stringResource(id = R.string.departures_title)
 
-    LoadingContent(
-        empty = when (uiState) {
-            is DeparturesUiState.Form.HasData -> false
-            is DeparturesUiState.Form.NoData -> uiState.isLoading
+    Scaffold(
+        scaffoldState = scaffoldState,
+        topBar = {
+            DeparturesFormTopAppBar(
+                title = title,
+                openDrawer = openDrawer
+            )
         },
-        emptyContent = { FullScreenLoading() },
-        loading = uiState.isLoading,
-        onRefresh = { },
-        content = {
-            when (uiState) {
-                is DeparturesUiState.Form.HasData -> {
-                    Scaffold(
-                        scaffoldState = scaffoldState,
-                        topBar = {
-                            DeparturesTopAppBar(
-                                title = title,
-                                openDrawer = openDrawer
-                            )
-                        },
-                        floatingActionButton = {
-                            FloatingActionButton(
-                                onClick = {
-                                    onFormSubmit(
-                                        uiState.selectedStop.id,
-                                        LocalTime.now()
-                                    )
-                                },
-                                backgroundColor = MaterialTheme.colors.primary
-                            ) {
-                                Icon(
-                                    Icons.Filled.Search,
-                                    contentDescription = "Search for departures"
-                                )
-                            }
-                        },
-                        modifier = modifier
-                    ) {
-                        hasDataContent(uiState, modifier)
-                    }
-                }
-                is DeparturesUiState.Form.NoData -> {
-                    Box(modifier.fillMaxSize()) { /* empty screen */ }
+        floatingActionButton = {
+            if(uiState is DeparturesUiState.Form.HasData) {
+                FloatingActionButton(
+                    onClick = {
+                        onFormSubmit(
+                            uiState.selectedStop.id,
+                            LocalTime.now()
+                        )
+                    },
+                    backgroundColor = MaterialTheme.colors.primary
+                ) {
+                    Icon(
+                        Icons.Filled.Search,
+                        contentDescription = "Search for departures"
+                    )
                 }
             }
-        }
-    )
+        },
+        modifier = modifier
+    ) {
+        LoadingContent(
+            empty = when (uiState) {
+                is DeparturesUiState.Form.HasData -> false
+                is DeparturesUiState.Form.NoData -> uiState.isLoading
+            },
+            emptyContent = { FullScreenLoading() },
+            content = {
+                when (uiState) {
+                    is DeparturesUiState.Form.HasData -> {
+
+                        hasDataContent(uiState, modifier)
+
+                    }
+                    is DeparturesUiState.Form.NoData -> {
+                        Box(modifier.fillMaxSize()) { /* empty screen */ }
+                    }
+                }
+            }
+        )
+    }
 }
 
 @Composable
 private fun LoadingContent(
     empty: Boolean,
     emptyContent: @Composable () -> Unit,
-    loading: Boolean,
-    onRefresh: () -> Unit,
     content: @Composable () -> Unit
 ) {
     if (empty) {
         emptyContent()
     } else {
-        SwipeRefresh(
-            state = rememberSwipeRefreshState(loading),
-            onRefresh = onRefresh,
-            content = content,
-        )
+        content()
     }
 }
 
@@ -289,31 +285,6 @@ fun DepartureItemPreview() {
 }
 
 
-@Composable
-fun DeparturesTime() {
-    val openDialog = remember { mutableStateOf(false) }
-    val (time, setTime) = remember { mutableStateOf(Time(12, 0)) }
-
-    TextButton(
-        onClick = { openDialog.value = true }
-    ) {
-        val text = "%02d %02d".format(time.hours, time.minutes)
-        Text(
-            text = text,
-            style = MaterialTheme.typography.button,
-            color = MaterialTheme.colors.primary
-        )
-    }
-
-    if (openDialog.value) {
-        TrefuTimePickerDialog(
-            time = time,
-            onTimeSelected = setTime,
-            onDismissRequest = { openDialog.value = false }
-        )
-    }
-}
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DeparturesStopLocation(
@@ -363,7 +334,7 @@ fun DeparturesStopLocation(
 
 
 @Composable
-fun DeparturesTopAppBar(
+fun DeparturesFormTopAppBar(
     title: String,
     openDrawer: () -> Unit
 ) {
@@ -383,14 +354,23 @@ fun DeparturesTopAppBar(
     )
 }
 
-
 @Composable
-private fun FullScreenLoading() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .wrapContentSize(Alignment.Center)
-    ) {
-        CircularProgressIndicator()
-    }
+fun DeparturesResultsTopAppBar(
+    title: String,
+    closeResults: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            Text(title)
+        },
+        navigationIcon = {
+            IconButton(onClick = closeResults) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.cd_close_departures_results),
+                )
+            }
+        },
+        elevation = 0.dp
+    )
 }

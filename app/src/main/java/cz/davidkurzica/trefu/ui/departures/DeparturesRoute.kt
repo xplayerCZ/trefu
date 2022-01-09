@@ -23,7 +23,7 @@ fun DeparturesRoute(
         onFormUpdate = { departuresViewModel.updateForm(it) },
         onFormClean = { departuresViewModel.cleanForm() },
         onErrorDismiss = { departuresViewModel.errorShown(it) },
-        onCloseResults = { departuresViewModel.closeResults() },
+        closeResults = { departuresViewModel.closeResults() },
         openDrawer = openDrawer,
         scaffoldState = scaffoldState,
     )
@@ -36,7 +36,7 @@ fun DeparturesRoute(
     onFormClean: () -> Unit,
     onFormUpdate: (Stop) -> Unit,
     onErrorDismiss: (Long) -> Unit,
-    onCloseResults: () -> Unit,
+    closeResults: () -> Unit,
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState
 ) {
@@ -57,12 +57,12 @@ fun DeparturesRoute(
             ResultsScreen(
                 uiState = uiState as DeparturesUiState.Results,
                 onErrorDismiss = onErrorDismiss,
-                openDrawer = openDrawer,
+                closeResults = closeResults,
                 scaffoldState = scaffoldState,
             )
 
             BackHandler {
-                onCloseResults()
+                closeResults()
             }
         }
     }

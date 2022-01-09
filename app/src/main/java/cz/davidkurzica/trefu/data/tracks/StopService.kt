@@ -5,6 +5,6 @@ import retrofit2.http.GET
 
 interface StopService {
 
-    @GET("stop")
+    @GET("stop/item")
     suspend fun getStops(): List<Stop>
 }

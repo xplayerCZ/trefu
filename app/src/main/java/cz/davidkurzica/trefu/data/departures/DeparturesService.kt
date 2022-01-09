@@ -8,6 +8,6 @@ import java.time.LocalTime
 
 interface DeparturesService {
 
-    @GET("departure")
+    @GET("departure/item")
     suspend fun getDepartures(@Query("stopId") stopId: Int, @Query("time") time: LocalTime, @Query("date") date: LocalDate): List<Departure>
 }
