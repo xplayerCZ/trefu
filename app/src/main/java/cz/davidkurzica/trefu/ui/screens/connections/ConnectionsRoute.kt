@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.ui.connections
+package cz.davidkurzica.trefu.ui.screens.connections
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.material.ScaffoldState
@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import cz.davidkurzica.trefu.model.ConnectionsFormData
-import java.time.LocalTime
 
 @Composable
 fun ConnectionsRoute(

@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.ui.departures
+package cz.davidkurzica.trefu.ui.screens.departures
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.material.ScaffoldState
@@ -19,8 +19,9 @@ fun DeparturesRoute(
 
     DeparturesRoute(
         uiState = uiState,
-        onFormSubmit = { stopId, timeId -> departuresViewModel.submitForm(stopId, timeId) },
-        onFormUpdate = { departuresViewModel.updateForm(it) },
+        onFormSubmit = { stopId, time -> departuresViewModel.submitForm(stopId, time) },
+        onSelectedTrackUpdate = { departuresViewModel.updateTrack(it) },
+        onSelectedTimeUpdate = { departuresViewModel.updateTime(it) },
         onFormClean = { departuresViewModel.cleanForm() },
         onErrorDismiss = { departuresViewModel.errorShown(it) },
         closeResults = { departuresViewModel.closeResults() },
@@ -34,7 +35,8 @@ fun DeparturesRoute(
     uiState: DeparturesUiState,
     onFormSubmit: (Int, LocalTime) -> Unit,
     onFormClean: () -> Unit,
-    onFormUpdate: (Stop) -> Unit,
+    onSelectedTrackUpdate: (Stop) -> Unit,
+    onSelectedTimeUpdate: (LocalTime) -> Unit,
     onErrorDismiss: (Long) -> Unit,
     closeResults: () -> Unit,
     openDrawer: () -> Unit,
@@ -47,10 +49,11 @@ fun DeparturesRoute(
                 uiState = uiState as DeparturesUiState.Form,
                 onFormSubmit = onFormSubmit,
                 onFormClean = onFormClean,
-                onFormUpdate = onFormUpdate,
-                onErrorDismiss = onErrorDismiss,
+                onSelectedTimeUpdate = onSelectedTimeUpdate,
+                onSelectedTrackUpdate = onSelectedTrackUpdate,
                 openDrawer = openDrawer,
                 scaffoldState = scaffoldState,
+                onErrorDismiss = onErrorDismiss
             )
         }
         DeparturesScreenType.Results -> {

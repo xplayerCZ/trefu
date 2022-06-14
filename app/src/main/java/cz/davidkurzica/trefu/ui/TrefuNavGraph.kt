@@ -8,13 +8,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import cz.davidkurzica.trefu.data.AppContainer
-import cz.davidkurzica.trefu.ui.connections.ConnectionsRoute
-import cz.davidkurzica.trefu.ui.connections.ConnectionsViewModel
-import cz.davidkurzica.trefu.ui.departures.DeparturesRoute
-import cz.davidkurzica.trefu.ui.departures.DeparturesViewModel
-import cz.davidkurzica.trefu.ui.home.HomeRoute
-import cz.davidkurzica.trefu.ui.timetables.TimetablesRoute
-import cz.davidkurzica.trefu.ui.timetables.TimetablesViewModel
+import cz.davidkurzica.trefu.ui.screens.connections.ConnectionsRoute
+import cz.davidkurzica.trefu.ui.screens.connections.ConnectionsViewModel
+import cz.davidkurzica.trefu.ui.screens.departures.DeparturesRoute
+import cz.davidkurzica.trefu.ui.screens.departures.DeparturesViewModel
+import cz.davidkurzica.trefu.ui.screens.home.HomeRoute
+import cz.davidkurzica.trefu.ui.screens.timetables.TimetablesRoute
+import cz.davidkurzica.trefu.ui.screens.timetables.TimetablesViewModel
 
 @Composable
 fun TrefuNavGraph(
@@ -34,7 +34,10 @@ fun TrefuNavGraph(
         }
         composable(TrefuDestinations.DEPARTURES_ROUTE) {
             val departuresViewModel: DeparturesViewModel = viewModel(
-                factory = DeparturesViewModel.provideFactory(appContainer.departureService, appContainer.stopService)
+                factory = DeparturesViewModel.provideFactory(
+                    appContainer.departureService,
+                    appContainer.formService
+                )
             )
 
             DeparturesRoute(
@@ -44,7 +47,10 @@ fun TrefuNavGraph(
         }
         composable(TrefuDestinations.CONNECTIONS_ROUTE) {
             val connectionsViewModel: ConnectionsViewModel = viewModel(
-                factory = ConnectionsViewModel.provideFactory(appContainer.connectionService, appContainer.stopService)
+                factory = ConnectionsViewModel.provideFactory(
+                    appContainer.connectionService,
+                    appContainer.formService
+                )
             )
 
             ConnectionsRoute(
@@ -54,7 +60,10 @@ fun TrefuNavGraph(
         }
         composable(TrefuDestinations.TIMETABLES_ROUTE) {
             val timetablesViewModel: TimetablesViewModel = viewModel(
-                factory = TimetablesViewModel.provideFactory(appContainer.timetableService, appContainer.stopService)
+                factory = TimetablesViewModel.provideFactory(
+                    appContainer.timetableService,
+                    appContainer.formService
+                )
             )
 
             TimetablesRoute(

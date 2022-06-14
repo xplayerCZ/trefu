@@ -1,14 +1,14 @@
 package cz.davidkurzica.trefu.ui.components
 
 import android.widget.TimePicker
-import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.ui.theme.TrefuTheme
 import java.time.LocalTime
 
@@ -37,7 +36,6 @@ fun TrefuTimePickerDialog(
         ) {
             Column(
                 Modifier
-                    .defaultMinSize(minHeight = 72.dp)
                     .fillMaxWidth()
                     .background(
                         color = MaterialTheme.colors.primary,
@@ -50,8 +48,6 @@ fun TrefuTimePickerDialog(
                     style = MaterialTheme.typography.caption,
                     color = MaterialTheme.colors.onPrimary
                 )
-
-                Spacer(modifier = Modifier.size(16.dp))
             }
 
             TimePickerDialog(time = time, onTimeChanged = onTimeSelected)
@@ -96,7 +92,8 @@ fun TimePickerDialog(time: LocalTime, onTimeChanged: (LocalTime) -> Unit) {
     AndroidView(
         modifier = Modifier.wrapContentSize(),
         factory = { context ->
-            TimePicker(ContextThemeWrapper(context, R.style.TimePicker))
+            TimePicker(context)
+            //TimePicker(ContextThemeWrapper(context, R.style.TimePicker))
         },
         update = { view ->
             run {

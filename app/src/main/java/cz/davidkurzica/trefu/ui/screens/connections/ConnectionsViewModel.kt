@@ -1,31 +1,32 @@
-package cz.davidkurzica.trefu.ui.departures
+package cz.davidkurzica.trefu.ui.screens.connections
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import cz.davidkurzica.trefu.R
-import cz.davidkurzica.trefu.model.DepartureWithLine
-import cz.davidkurzica.trefu.util.ErrorMessage
 import cz.davidkurzica.trefu.data.Result
-import cz.davidkurzica.trefu.data.departures.DepartureService
-import cz.davidkurzica.trefu.data.tracks.StopService
+import cz.davidkurzica.trefu.data.connections.ConnectionService
+import cz.davidkurzica.trefu.data.tracks.FormService
+import cz.davidkurzica.trefu.model.Connection
+import cz.davidkurzica.trefu.model.ConnectionsFormData
 import cz.davidkurzica.trefu.model.Stop
+import cz.davidkurzica.trefu.util.ErrorMessage
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
 import java.util.*
 
-sealed interface DeparturesUiState {
+sealed interface ConnectionsUiState {
 
     val isResultsOpen: Boolean
     val errorMessages: List<ErrorMessage>
 
-    sealed interface Form : DeparturesUiState {
+    sealed interface Form : ConnectionsUiState {
         val isLoading: Boolean
 
         data class HasData(
-            val selectedStop: Stop,
+            val formData: ConnectionsFormData,
             val stops: List<Stop>,
             override val isResultsOpen: Boolean,
             override val isLoading: Boolean,
@@ -40,11 +41,11 @@ sealed interface DeparturesUiState {
     }
 
 
-    sealed interface Results : DeparturesUiState {
+    sealed interface Results : ConnectionsUiState {
         val isLoading: Boolean
 
         data class HasResults(
-            val departureWithLines: List<DepartureWithLine>,
+            val connections: List<Connection>,
             override val isResultsOpen: Boolean,
             override val isLoading: Boolean,
             override val errorMessages: List<ErrorMessage>,
@@ -57,27 +58,35 @@ sealed interface DeparturesUiState {
     }
 }
 
-private data class DeparturesViewModelState(
-    val selectedStop: Stop? = null,
+private data class ConnectionsViewModelState(
+    val selectedStopFrom: Stop? = null,
+    val selectedTimeFrom: LocalTime = LocalTime.now(),
+    val selectedStopTo: Stop? = null,
+    val selectedTimeTo: LocalTime = LocalTime.now(),
     val stops: List<Stop> = emptyList(),
-    val departureWithLines: List<DepartureWithLine> = emptyList(),
+    val connections: List<Connection> = emptyList(),
     val isFormLoading: Boolean = false,
     val isResultsLoading: Boolean = false,
     val showResults: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
 ) {
 
-    fun toUiState(): DeparturesUiState =
+    fun toUiState(): ConnectionsUiState =
         if (!showResults) {
             if(isFormLoading || stops.isEmpty()) {
-                DeparturesUiState.Form.NoData(
+                ConnectionsUiState.Form.NoData(
                     isResultsOpen = showResults,
                     isLoading = isFormLoading,
                     errorMessages = errorMessages
                 )
             } else {
-                DeparturesUiState.Form.HasData(
-                    selectedStop = selectedStop ?: stops[0],
+                ConnectionsUiState.Form.HasData(
+                    formData = ConnectionsFormData(
+                        selectedStopFrom = selectedStopFrom ?: stops[0],
+                        selectedTimeFrom = selectedTimeFrom,
+                        selectedStopTo = selectedStopTo ?: stops[0],
+                        selectedTimeTo = selectedTimeTo,
+                    ),
                     stops = stops,
                     isResultsOpen = showResults,
                     isLoading = isFormLoading,
@@ -86,14 +95,14 @@ private data class DeparturesViewModelState(
             }
         } else {
             if(isResultsLoading) {
-                DeparturesUiState.Results.NoResults(
+                ConnectionsUiState.Results.NoResults(
                     isResultsOpen = showResults,
                     isLoading = isFormLoading,
                     errorMessages = errorMessages
                 )
             } else {
-                DeparturesUiState.Results.HasResults(
-                    departureWithLines = departureWithLines,
+                ConnectionsUiState.Results.HasResults(
+                    connections = connections,
                     isResultsOpen = showResults,
                     isLoading = isFormLoading,
                     errorMessages = errorMessages
@@ -102,12 +111,12 @@ private data class DeparturesViewModelState(
         }
 }
 
-class DeparturesViewModel(
-    private val departureService: DepartureService,
-    private val stopService: StopService
+class ConnectionsViewModel(
+    private val connectionService: ConnectionService,
+    private val FormService: FormService
 ) : ViewModel() {
 
-    private val viewModelState = MutableStateFlow(DeparturesViewModelState())
+    private val viewModelState = MutableStateFlow(ConnectionsViewModelState())
 
     val uiState = viewModelState
         .map { it.toUiState() }
@@ -133,7 +142,7 @@ class DeparturesViewModel(
         viewModelState.update { it.copy(isFormLoading = true) }
 
         viewModelScope.launch {
-            val result = Result.Success(stopService.getStops()) as Result<List<Stop>>
+            val result = Result.Success(FormService.getStops()) as Result<List<Stop>>
             viewModelState.update {
                 when (result) {
                     is Result.Success -> it.copy(stops = result.data, isFormLoading = false)
@@ -149,14 +158,20 @@ class DeparturesViewModel(
         }
     }
 
-    fun submitForm(stopId: Int, time: LocalTime = LocalTime.now(), date: LocalDate = LocalDate.now()) {
+    fun submitForm(formData: ConnectionsFormData, date: LocalDate = LocalDate.now()) {
         viewModelState.update { it.copy(showResults = true, isResultsLoading = true) }
 
         viewModelScope.launch {
-            val result = Result.Success(departureService.getDepartures(stopId, time, date)) as Result<List<DepartureWithLine>>
+            val result = Result.Success(connectionService.getConnections(
+                formData.selectedStopFrom.id,
+                formData.selectedTimeFrom,
+                formData.selectedStopTo.id,
+                formData.selectedTimeTo,
+                date
+            )) as Result<List<Connection>>
             viewModelState.update {
                 when (result) {
-                    is Result.Success -> it.copy(departureWithLines = result.data, isResultsLoading = false)
+                    is Result.Success -> it.copy(connections = result.data, isResultsLoading = false)
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -177,19 +192,23 @@ class DeparturesViewModel(
         viewModelState.update { it.copy(showResults = false) }
     }
 
-    fun updateForm(stop: Stop) {
-        viewModelState.update { it.copy(selectedStop = stop) }
+    fun updateForm(formData: ConnectionsFormData) {
+        viewModelState.update { it.copy(
+            selectedStopFrom = formData.selectedStopFrom,
+            selectedTimeFrom = formData.selectedTimeFrom,
+            selectedStopTo = formData.selectedStopTo,
+            selectedTimeTo = formData.selectedTimeTo,
+        ) }
     }
-
 
     companion object {
         fun provideFactory(
-            departureService: DepartureService,
-            stopService: StopService,
+            connectionService: ConnectionService,
+            FormService: FormService,
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return DeparturesViewModel(departureService, stopService) as T
+                return ConnectionsViewModel(connectionService, FormService) as T
             }
         }
     }

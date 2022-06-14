@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.ui.home
+package cz.davidkurzica.trefu.ui.screens.home
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState

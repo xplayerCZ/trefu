@@ -20,7 +20,7 @@ class TrefuNavigationActions(navController: NavHostController) {
     val navigateToHome: () -> Unit = {
         navController.navigate(TrefuDestinations.HOME_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
+                saveState = false //DEFAULT: true
             }
             launchSingleTop = true
             restoreState = false //DEFAULT: true
@@ -38,19 +38,19 @@ class TrefuNavigationActions(navController: NavHostController) {
     val navigateToConnections: () -> Unit = {
         navController.navigate(TrefuDestinations.CONNECTIONS_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
+                saveState = false //DEFAULT: true
             }
             launchSingleTop = true
-            restoreState = true
+            restoreState = false //DEFAULT: true
         }
     }
     val navigateToTimetables: () -> Unit = {
         navController.navigate(TrefuDestinations.TIMETABLES_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
+                saveState = false //DEFAULT: true
             }
             launchSingleTop = true
-            restoreState = true
+            restoreState = false //DEFAULT: true
         }
     }
 }

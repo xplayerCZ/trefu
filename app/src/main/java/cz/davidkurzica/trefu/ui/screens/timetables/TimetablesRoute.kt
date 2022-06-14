@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.ui.timetables
+package cz.davidkurzica.trefu.ui.screens.timetables
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.material.ScaffoldState
@@ -6,8 +6,10 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import cz.davidkurzica.trefu.model.Direction
+import cz.davidkurzica.trefu.model.Line
 import cz.davidkurzica.trefu.model.Stop
-import java.time.LocalTime
+import cz.davidkurzica.trefu.model.TimetablesFormData
 
 @Composable
 fun TimetablesRoute(
@@ -19,8 +21,10 @@ fun TimetablesRoute(
 
     TimetablesRoute(
         uiState = uiState,
-        onFormSubmit = { stopId, timeId -> timetablesViewModel.submitForm(stopId, timeId) },
-        onFormUpdate = { timetablesViewModel.updateForm(it) },
+        onFormSubmit = { timetablesViewModel.submitForm(it) },
+        onLineUpdate = { timetablesViewModel.updateLine(it) },
+        onStopUpdate = { timetablesViewModel.updateStop(it) },
+        onDirectionUpdate = { timetablesViewModel.updateDirection(it) },
         onFormClean = { timetablesViewModel.cleanForm() },
         onErrorDismiss = { timetablesViewModel.errorShown(it) },
         closeResults = { timetablesViewModel.closeResults() },
@@ -32,9 +36,11 @@ fun TimetablesRoute(
 @Composable
 fun TimetablesRoute(
     uiState: TimetablesUiState,
-    onFormSubmit: (Int, LocalTime) -> Unit,
+    onFormSubmit: (TimetablesFormData) -> Unit,
     onFormClean: () -> Unit,
-    onFormUpdate: (Stop) -> Unit,
+    onLineUpdate: (Line) -> Unit,
+    onStopUpdate: (Stop) -> Unit,
+    onDirectionUpdate: (Direction) -> Unit,
     onErrorDismiss: (Long) -> Unit,
     closeResults: () -> Unit,
     openDrawer: () -> Unit,
@@ -47,7 +53,9 @@ fun TimetablesRoute(
                 uiState = uiState as TimetablesUiState.Form,
                 onFormSubmit = onFormSubmit,
                 onFormClean = onFormClean,
-                onFormUpdate = onFormUpdate,
+                onLineUpdate = onLineUpdate,
+                onStopUpdate = onStopUpdate,
+                onDirectionUpdate = onDirectionUpdate,
                 onErrorDismiss = onErrorDismiss,
                 openDrawer = openDrawer,
                 scaffoldState = scaffoldState,

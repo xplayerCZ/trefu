@@ -13,7 +13,7 @@ data class DepartureWithLine(
 
 @Serializable
 data class DepartureSimple(
-    val time: @Serializable(with = LocalTimeSerializer::class) LocalTime,
+    val time: @Serializable(with = LocalTimeSerializer::class) LocalTime?,
     val stopName: String,
 )
 

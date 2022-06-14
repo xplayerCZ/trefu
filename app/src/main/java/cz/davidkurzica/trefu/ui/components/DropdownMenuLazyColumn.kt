@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.ui.util
+package cz.davidkurzica.trefu.ui.components
 
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
