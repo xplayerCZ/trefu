@@ -1,4 +1,4 @@
-package cz.davidkurzica.util
+package cz.davidkurzica.trefu.util
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind

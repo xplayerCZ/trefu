@@ -46,8 +46,7 @@ fun TimetablesRoute(
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState
 ) {
-    val timetablesScreenType = getTimetablesScreenType(uiState)
-    when (timetablesScreenType) {
+    when (getTimetablesScreenType(uiState)) {
         TimetablesScreenType.Form -> {
             FormScreen(
                 uiState = uiState as TimetablesUiState.Form,

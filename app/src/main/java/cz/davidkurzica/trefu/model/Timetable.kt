@@ -1,10 +1,8 @@
 package cz.davidkurzica.trefu.model
 
-import cz.davidkurzica.util.LocalDateSerializer
-import cz.davidkurzica.util.LocalTimeSerializer
+import cz.davidkurzica.trefu.util.LocalDateSerializer
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
-import java.time.LocalTime
 
 @Serializable
 data class Timetable(

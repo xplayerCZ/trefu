@@ -1,6 +1,6 @@
 package cz.davidkurzica.trefu.model
 
-import cz.davidkurzica.util.LocalTimeSerializer
+import cz.davidkurzica.trefu.util.LocalTimeSerializer
 import kotlinx.serialization.Serializable
 import java.time.LocalTime
 

@@ -26,12 +26,12 @@ fun TimetablesList(
         Row(
             modifier.padding(8.dp)
         ) {
-            Spacer(androidx.compose.ui.Modifier.size(16.dp))
+            Spacer(Modifier.size(16.dp))
             Text(
                 text = timetable.lineShortCode,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(androidx.compose.ui.Modifier.size(16.dp))
+            Spacer(Modifier.size(16.dp))
             Text(
                 text = timetable.date.toString(),
                 fontWeight = FontWeight.Bold
@@ -57,7 +57,7 @@ fun TimetableItem(
         elevation = 4.dp
     ) {
         Column(
-            modifier = androidx.compose.ui.Modifier
+            modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {

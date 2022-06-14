@@ -1,6 +1,5 @@
 package cz.davidkurzica.trefu.data
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 @Serializable

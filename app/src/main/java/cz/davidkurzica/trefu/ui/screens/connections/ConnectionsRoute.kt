@@ -39,8 +39,7 @@ fun ConnectionsRoute(
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState
 ) {
-    val connectionsScreenType = getConnectionsScreenType(uiState)
-    when (connectionsScreenType) {
+    when (getConnectionsScreenType(uiState)) {
         ConnectionsScreenType.Form -> {
             FormScreen(
                 uiState = uiState as ConnectionsUiState.Form,

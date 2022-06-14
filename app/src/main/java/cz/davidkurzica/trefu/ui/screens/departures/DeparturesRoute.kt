@@ -42,8 +42,7 @@ fun DeparturesRoute(
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState
 ) {
-    val departuresScreenType = getDeparturesScreenType(uiState)
-    when (departuresScreenType) {
+    when (getDeparturesScreenType(uiState)) {
         DeparturesScreenType.Form -> {
             FormScreen(
                 uiState = uiState as DeparturesUiState.Form,

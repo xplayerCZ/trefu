@@ -58,7 +58,7 @@ fun ConnectionSubItem(
 ) {
 
     Column(
-        modifier = androidx.compose.ui.Modifier
+        modifier = Modifier
             .padding(12.dp)
             .fillMaxWidth()
     ) {
@@ -71,7 +71,7 @@ fun ConnectionSubItem(
             Text(
                 text = formatter.format(from.time),
             )
-            Spacer(androidx.compose.ui.Modifier.size(16.dp))
+            Spacer(Modifier.size(16.dp))
             Text(
                 text = from.stopName,
             )
@@ -80,7 +80,7 @@ fun ConnectionSubItem(
             Text(
                 text = formatter.format(to.time),
             )
-            Spacer(androidx.compose.ui.Modifier.size(16.dp))
+            Spacer(Modifier.size(16.dp))
             Text(
                 text = to.stopName,
             )
