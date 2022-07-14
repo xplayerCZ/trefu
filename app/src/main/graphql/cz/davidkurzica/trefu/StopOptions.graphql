@@ -1,0 +1,6 @@
+query StopOptions {
+    stops {
+        id
+        name
+    }
+}

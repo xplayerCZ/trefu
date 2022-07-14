@@ -2,6 +2,7 @@ package cz.davidkurzica.trefu.ui.screens.connections
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -82,7 +83,7 @@ private fun ConnectionsScreenWithForm(
             }
         },
         modifier = modifier
-    ) {
+    ) { padding ->
         LoadingContent(
             empty = when (uiState) {
                 is ConnectionsUiState.Form.HasData -> false
@@ -93,7 +94,7 @@ private fun ConnectionsScreenWithForm(
                 when (uiState) {
                     is ConnectionsUiState.Form.HasData -> {
 
-                        hasDataContent(uiState, modifier)
+                        hasDataContent(uiState, modifier.padding(padding))
 
                     }
                     is ConnectionsUiState.Form.NoData -> {

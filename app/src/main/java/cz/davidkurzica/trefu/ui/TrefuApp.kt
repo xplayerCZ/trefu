@@ -2,18 +2,23 @@ package cz.davidkurzica.trefu.ui
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.DrawerValue
+import androidx.compose.material.ModalDrawer
+import androidx.compose.material.rememberDrawerState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import cz.davidkurzica.trefu.data.AppContainer
+import com.apollographql.apollo3.ApolloClient
 import cz.davidkurzica.trefu.ui.theme.TrefuTheme
 import kotlinx.coroutines.launch
 
 @Composable
 fun TrefuApp(
-    appContainer: AppContainer,
+    apolloClient: ApolloClient,
 ) {
     TrefuTheme(darkTheme = false) {
             val navController = rememberNavController()
@@ -48,7 +53,7 @@ fun TrefuApp(
                         .fillMaxSize()
                 ) {
                     TrefuNavGraph(
-                        appContainer = appContainer,
+                        apolloClient = apolloClient,
                         navController = navController,
                         openDrawer = { coroutineScope.launch { drawerState.open() } }
                     )

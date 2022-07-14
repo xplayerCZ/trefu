@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'com.apollographql.apollo3'
 }
 
 android {
@@ -37,7 +38,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion compose_version
+        kotlinCompilerExtensionVersion = "1.2.0"
     }
     packagingOptions {
         resources {
@@ -79,8 +80,9 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
 
     implementation 'androidx.navigation:navigation-compose:2.5.0'
-
     implementation "androidx.window:window:1.1.0-alpha02"
+
+    implementation "com.apollographql.apollo3:apollo-runtime:3.3.2"
 
     androidTestImplementation 'androidx.test:core:1.4.0'
     androidTestImplementation 'androidx.test:rules:1.4.0'
@@ -98,4 +100,10 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
 
         jvmTarget = "1.8"
     }
+}
+
+apollo {
+    packageName.set("cz.davidkurzica.trefu")
+    mapScalar("Date", "java.util.LocalDate", "cz.davidkurzica.trefu.adapter.LocalDateAdapter")
+    mapScalar("Time", "java.util.LocalTime", "cz.davidkurzica.trefu.adapter.LocalTimeAdapter")
 }

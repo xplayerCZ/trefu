@@ -1,14 +1,20 @@
 package cz.davidkurzica.trefu.ui.screens.timetables
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.apollographql.apollo3.ApolloClient
+import cz.davidkurzica.trefu.DirectionOptionsQuery
+import cz.davidkurzica.trefu.LineOptionsQuery
 import cz.davidkurzica.trefu.R
+import cz.davidkurzica.trefu.StopOptionsQuery
+import cz.davidkurzica.trefu.adapter.queryResult
 import cz.davidkurzica.trefu.data.Result
-import cz.davidkurzica.trefu.data.timetables.TimetableService
-import cz.davidkurzica.trefu.data.tracks.FormService
 import cz.davidkurzica.trefu.model.*
 import cz.davidkurzica.trefu.util.ErrorMessage
+import cz.davidkurzica.trefu.util.toLine
+import cz.davidkurzica.trefu.util.toStop
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -82,9 +88,9 @@ private data class TimetablesViewModelState(
             } else {
                 TimetablesUiState.Form.HasData(
                     formData = TimetablesFormData(
-                        selectedStop = selectedStop ?: stops[0],
-                        selectedLine = selectedLine ?: lines[0],
-                        selectedDirection = selectedDirection ?: directions[0]
+                        selectedStop = selectedStop ?: stops.first(),
+                        selectedLine = selectedLine ?: lines.first(),
+                        selectedDirection = selectedDirection ?: directions.first()
                     ),
                     stops = stops,
                     lines = lines,
@@ -113,8 +119,7 @@ private data class TimetablesViewModelState(
 }
 
 class TimetablesViewModel(
-    private val timetableService: TimetableService,
-    private val formService: FormService
+    private val apolloClient: ApolloClient
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(TimetablesViewModelState())
@@ -129,7 +134,7 @@ class TimetablesViewModel(
 
 
     init {
-        loadStops()
+        launchWithLoading { updateStops() }
     }
 
     fun errorShown(errorId: Long) {
@@ -139,80 +144,71 @@ class TimetablesViewModel(
         }
     }
 
-    fun loadDirections(lineId: Int) {
-        viewModelState.update { it.copy(isFormLoading = true) }
-
-        viewModelScope.launch {
-            val result =
-                Result.Success(formService.getDirections(lineId)) as Result<List<Direction>>
-            viewModelState.update {
-                when (result) {
-                    is Result.Success -> it.copy(
-                        directions = result.data,
-                        selectedDirection = null,
-                        isFormLoading = false
+    private suspend fun updateStops() {
+        val result = apolloClient.queryResult(StopOptionsQuery())
+        viewModelState.update {
+            when (result) {
+                is Result.Success -> it.copy(stops = result.data.stops.map { orig -> orig.toStop() })
+                is Result.Error -> {
+                    val errorMessages = it.errorMessages + ErrorMessage(
+                        id = UUID.randomUUID().mostSignificantBits,
+                        messageId = R.string.load_error
                     )
-                    is Result.Error -> {
-                        val errorMessages = it.errorMessages + ErrorMessage(
-                            id = UUID.randomUUID().mostSignificantBits,
-                            messageId = R.string.load_error
-                        )
-                        it.copy(errorMessages = errorMessages, isFormLoading = false)
-                    }
+                    it.copy(errorMessages = errorMessages)
                 }
             }
         }
+
+        viewModelState.value.stops.firstOrNull()?.let { updateLines(it.id) }
     }
 
-    fun loadLines(stopId: Int) {
-        viewModelState.update { it.copy(isFormLoading = true) }
+    private suspend fun updateLines(stopId: Int) {
+        val result = apolloClient.queryResult(LineOptionsQuery(stopId = stopId.toString()))
 
-        viewModelScope.launch {
-            val result =
-                Result.Success(formService.getLines(stopId, LocalDate.now())) as Result<List<Line>>
-            viewModelState.update {
-                when (result) {
-                    is Result.Success -> it.copy(
-                        lines = result.data,
-                        selectedLine = null,
-                        isFormLoading = false
+        viewModelState.update {
+            when (result) {
+                is Result.Success -> it.copy(
+                    lines = result.data.stop.routeStops.map { routeStop -> routeStop.route.line.toLine() },
+                    selectedLine = null,
+                )
+                is Result.Error -> {
+                    val errorMessages = it.errorMessages + ErrorMessage(
+                        id = UUID.randomUUID().mostSignificantBits,
+                        messageId = R.string.load_error
                     )
-                    is Result.Error -> {
-                        val errorMessages = it.errorMessages + ErrorMessage(
-                            id = UUID.randomUUID().mostSignificantBits,
-                            messageId = R.string.load_error
-                        )
-                        it.copy(errorMessages = errorMessages, isFormLoading = false)
-                    }
+                    it.copy(errorMessages = errorMessages)
                 }
             }
-            if (result is Result.Success) {
-                loadDirections(result.data[0].id)
-            }
         }
+
+        viewModelState.value.lines.firstOrNull()?.let { updateDirections(it.id) }
     }
 
-    fun loadStops() {
-        viewModelState.update { it.copy(isFormLoading = true) }
+    private suspend fun updateDirections(lineId: Int) {
+        val result = apolloClient.queryResult(DirectionOptionsQuery(lineId.toString()))
 
-        viewModelScope.launch {
-            val result = Result.Success(formService.getStops()) as Result<List<Stop>>
-            viewModelState.update {
-                when (result) {
-                    is Result.Success -> it.copy(stops = result.data, isFormLoading = false)
-                    is Result.Error -> {
-                        val errorMessages = it.errorMessages + ErrorMessage(
-                            id = UUID.randomUUID().mostSignificantBits,
-                            messageId = R.string.load_error
+        viewModelState.update {
+            when (result) {
+                is Result.Success -> it.copy(
+                    directions = result.data.line.routes.mapIndexed { i, route ->
+                        Direction(
+                            i,
+                            route.lastRouteStop.first().stop.name
                         )
-                        it.copy(errorMessages = errorMessages, isFormLoading = false)
-                    }
+                    },
+                    selectedDirection = null,
+                )
+                is Result.Error -> {
+                    val errorMessages = it.errorMessages + ErrorMessage(
+                        id = UUID.randomUUID().mostSignificantBits,
+                        messageId = R.string.load_error
+                    )
+                    it.copy(errorMessages = errorMessages)
                 }
             }
-            if (result is Result.Success) {
-                loadLines(result.data[0].id)
-            }
         }
+
+        Log.d("Directions", viewModelState.value.directions.toString())
     }
 
     fun submitForm(formData: TimetablesFormData, date: LocalDate = LocalDate.now()) {
@@ -220,11 +216,10 @@ class TimetablesViewModel(
 
         viewModelScope.launch {
             val result = Result.Success(
-                timetableService.getTimetable(
-                    formData.selectedStop.id,
-                    formData.selectedLine.id,
-                    formData.selectedDirection.id,
-                    date
+                Timetable(
+                    date = LocalDate.now(),
+                    lineShortCode = "208",
+                    departures = listOf()
                 )
             ) as Result<Timetable>
             viewModelState.update {
@@ -251,9 +246,7 @@ class TimetablesViewModel(
     }
 
     fun updateLine(line: Line) {
-        viewModelState.update { it.copy(selectedLine = line) }
-
-        loadDirections(line.id)
+        launchWithLoading { updateDirections(line.id) }
     }
 
     fun updateDirection(direction: Direction) {
@@ -261,19 +254,24 @@ class TimetablesViewModel(
     }
 
     fun updateStop(stop: Stop) {
-        viewModelState.update { it.copy(selectedStop = stop) }
+        launchWithLoading { updateLines(stop.id) }
+    }
 
-        loadLines(stop.id)
+    private fun launchWithLoading(block: suspend () -> Unit) {
+        viewModelState.update { it.copy(isFormLoading = true) }
+        viewModelScope.launch {
+            block()
+            viewModelState.update { it.copy(isFormLoading = false) }
+        }
     }
 
     companion object {
         fun provideFactory(
-            timetableService: TimetableService,
-            formService: FormService,
+            apolloClient: ApolloClient
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return TimetablesViewModel(timetableService, formService) as T
+                return TimetablesViewModel(apolloClient) as T
             }
         }
     }

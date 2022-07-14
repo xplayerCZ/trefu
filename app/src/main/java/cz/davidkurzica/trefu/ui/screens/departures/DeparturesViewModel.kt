@@ -3,13 +3,15 @@ package cz.davidkurzica.trefu.ui.screens.departures
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.exception.ApolloException
 import cz.davidkurzica.trefu.R
+import cz.davidkurzica.trefu.StopOptionsQuery
 import cz.davidkurzica.trefu.data.Result
-import cz.davidkurzica.trefu.data.departures.DepartureService
-import cz.davidkurzica.trefu.data.tracks.FormService
 import cz.davidkurzica.trefu.model.DepartureWithLine
 import cz.davidkurzica.trefu.model.Stop
 import cz.davidkurzica.trefu.util.ErrorMessage
+import cz.davidkurzica.trefu.util.toStop
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -106,8 +108,7 @@ private data class DeparturesViewModelState(
 }
 
 class DeparturesViewModel(
-    private val departureService: DepartureService,
-    private val FormService: FormService
+    private val apolloClient: ApolloClient
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(DeparturesViewModelState())
@@ -136,10 +137,18 @@ class DeparturesViewModel(
         viewModelState.update { it.copy(isFormLoading = true) }
 
         viewModelScope.launch {
-            val result = Result.Success(FormService.getStops()) as Result<List<Stop>>
+            val result = try {
+                Result.Success(apolloClient.query(StopOptionsQuery()).execute().dataAssertNoErrors)
+            } catch (exception: ApolloException) {
+                Result.Error(exception)
+            }
+
             viewModelState.update {
                 when (result) {
-                    is Result.Success -> it.copy(stops = result.data, isFormLoading = false)
+                    is Result.Success -> it.copy(
+                        stops = result.data.stops.map { orig -> orig.toStop() },
+                        isFormLoading = false
+                    )
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -156,10 +165,14 @@ class DeparturesViewModel(
         viewModelState.update { it.copy(showResults = true, isResultsLoading = true) }
 
         viewModelScope.launch {
-            val result = Result.Success(departureService.getDepartures(stopId, time, date)) as Result<List<DepartureWithLine>>
+            val result =
+                Result.Success(listOf<DepartureWithLine>()) as Result<List<DepartureWithLine>>
             viewModelState.update {
                 when (result) {
-                    is Result.Success -> it.copy(departureWithLines = result.data, isResultsLoading = false)
+                    is Result.Success -> it.copy(
+                        departureWithLines = result.data,
+                        isResultsLoading = false
+                    )
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -190,12 +203,11 @@ class DeparturesViewModel(
 
     companion object {
         fun provideFactory(
-            departureService: DepartureService,
-            FormService: FormService,
+            apolloClient: ApolloClient
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return DeparturesViewModel(departureService, FormService) as T
+                return DeparturesViewModel(apolloClient) as T
             }
         }
     }

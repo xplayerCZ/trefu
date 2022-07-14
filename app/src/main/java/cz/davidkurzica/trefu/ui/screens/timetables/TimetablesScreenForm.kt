@@ -2,6 +2,7 @@ package cz.davidkurzica.trefu.ui.screens.timetables
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -92,7 +93,7 @@ private fun TimetablesScreenWithForm(
             }
         },
         modifier = modifier
-    ) {
+    ) { padding ->
         LoadingContent(
             empty = when (uiState) {
                 is TimetablesUiState.Form.HasData -> false
@@ -101,13 +102,13 @@ private fun TimetablesScreenWithForm(
             emptyContent = { FullScreenLoading() },
             content = {
                 when (uiState) {
-                    is TimetablesUiState.Form.HasData -> {
-
-                        hasDataContent(uiState, modifier)
-
-                    }
-                    is TimetablesUiState.Form.NoData -> {
-                        Box(modifier.fillMaxSize()) { /* empty screen */ }
+                    is TimetablesUiState.Form.HasData -> hasDataContent(
+                        uiState,
+                        modifier.padding(padding)
+                    )
+                    is TimetablesUiState.Form.NoData -> Box(modifier.fillMaxSize()) { /* empty screen */ Text(
+                        uiState.isLoading.toString()
+                    )
                     }
                 }
             }

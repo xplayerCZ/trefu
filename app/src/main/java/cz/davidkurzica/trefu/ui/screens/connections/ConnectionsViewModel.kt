@@ -3,14 +3,16 @@ package cz.davidkurzica.trefu.ui.screens.connections
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.exception.ApolloException
 import cz.davidkurzica.trefu.R
+import cz.davidkurzica.trefu.StopOptionsQuery
 import cz.davidkurzica.trefu.data.Result
-import cz.davidkurzica.trefu.data.connections.ConnectionService
-import cz.davidkurzica.trefu.data.tracks.FormService
 import cz.davidkurzica.trefu.model.Connection
 import cz.davidkurzica.trefu.model.ConnectionsFormData
 import cz.davidkurzica.trefu.model.Stop
 import cz.davidkurzica.trefu.util.ErrorMessage
+import cz.davidkurzica.trefu.util.toStop
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -112,8 +114,7 @@ private data class ConnectionsViewModelState(
 }
 
 class ConnectionsViewModel(
-    private val connectionService: ConnectionService,
-    private val FormService: FormService
+    private val apolloClient: ApolloClient
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(ConnectionsViewModelState())
@@ -142,10 +143,18 @@ class ConnectionsViewModel(
         viewModelState.update { it.copy(isFormLoading = true) }
 
         viewModelScope.launch {
-            val result = Result.Success(FormService.getStops()) as Result<List<Stop>>
+            val result = try {
+                Result.Success(apolloClient.query(StopOptionsQuery()).execute().dataAssertNoErrors)
+            } catch (exception: ApolloException) {
+                Result.Error(exception)
+            }
+
             viewModelState.update {
                 when (result) {
-                    is Result.Success -> it.copy(stops = result.data, isFormLoading = false)
+                    is Result.Success -> it.copy(
+                        stops = result.data.stops.map { stop -> stop.toStop() },
+                        isFormLoading = false
+                    )
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -162,13 +171,7 @@ class ConnectionsViewModel(
         viewModelState.update { it.copy(showResults = true, isResultsLoading = true) }
 
         viewModelScope.launch {
-            val result = Result.Success(connectionService.getConnections(
-                formData.selectedStopFrom.id,
-                formData.selectedTimeFrom,
-                formData.selectedStopTo.id,
-                formData.selectedTimeTo,
-                date
-            )) as Result<List<Connection>>
+            val result = Result.Success(listOf<Connection>()) as Result<List<Connection>>
             viewModelState.update {
                 when (result) {
                     is Result.Success -> it.copy(connections = result.data, isResultsLoading = false)
@@ -203,12 +206,11 @@ class ConnectionsViewModel(
 
     companion object {
         fun provideFactory(
-            connectionService: ConnectionService,
-            FormService: FormService,
+            apolloClient: ApolloClient
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return ConnectionsViewModel(connectionService, FormService) as T
+                return ConnectionsViewModel(apolloClient) as T
             }
         }
     }

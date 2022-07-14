@@ -2,6 +2,7 @@ package cz.davidkurzica.trefu.ui.screens.departures
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -89,7 +90,7 @@ private fun DeparturesScreenWithForm(
             }
         },
         modifier = modifier
-    ) {
+    ) { padding ->
         LoadingContent(
             empty = when (uiState) {
                 is DeparturesUiState.Form.HasData -> false
@@ -98,14 +99,11 @@ private fun DeparturesScreenWithForm(
             emptyContent = { FullScreenLoading() },
             content = {
                 when (uiState) {
-                    is DeparturesUiState.Form.HasData -> {
-
-                        hasDataContent(uiState, modifier)
-
-                    }
-                    is DeparturesUiState.Form.NoData -> {
-                        Box(modifier.fillMaxSize()) { /* empty screen */ }
-                    }
+                    is DeparturesUiState.Form.HasData -> hasDataContent(
+                        uiState,
+                        modifier.padding(padding)
+                    )
+                    is DeparturesUiState.Form.NoData -> Box(modifier.fillMaxSize()) { /* empty screen */ }
                 }
             }
         )

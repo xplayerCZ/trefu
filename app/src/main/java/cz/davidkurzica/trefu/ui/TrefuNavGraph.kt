@@ -7,7 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import cz.davidkurzica.trefu.data.AppContainer
+import com.apollographql.apollo3.ApolloClient
 import cz.davidkurzica.trefu.ui.screens.connections.ConnectionsRoute
 import cz.davidkurzica.trefu.ui.screens.connections.ConnectionsViewModel
 import cz.davidkurzica.trefu.ui.screens.departures.DeparturesRoute
@@ -18,7 +18,7 @@ import cz.davidkurzica.trefu.ui.screens.timetables.TimetablesViewModel
 
 @Composable
 fun TrefuNavGraph(
-    appContainer: AppContainer,
+    apolloClient: ApolloClient,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     openDrawer: () -> Unit = {},
@@ -34,10 +34,7 @@ fun TrefuNavGraph(
         }
         composable(TrefuDestinations.DEPARTURES_ROUTE) {
             val departuresViewModel: DeparturesViewModel = viewModel(
-                factory = DeparturesViewModel.provideFactory(
-                    appContainer.departureService,
-                    appContainer.formService
-                )
+                factory = DeparturesViewModel.provideFactory(apolloClient)
             )
 
             DeparturesRoute(
@@ -47,10 +44,7 @@ fun TrefuNavGraph(
         }
         composable(TrefuDestinations.CONNECTIONS_ROUTE) {
             val connectionsViewModel: ConnectionsViewModel = viewModel(
-                factory = ConnectionsViewModel.provideFactory(
-                    appContainer.connectionService,
-                    appContainer.formService
-                )
+                factory = ConnectionsViewModel.provideFactory(apolloClient)
             )
 
             ConnectionsRoute(
@@ -60,10 +54,7 @@ fun TrefuNavGraph(
         }
         composable(TrefuDestinations.TIMETABLES_ROUTE) {
             val timetablesViewModel: TimetablesViewModel = viewModel(
-                factory = TimetablesViewModel.provideFactory(
-                    appContainer.timetableService,
-                    appContainer.formService
-                )
+                factory = TimetablesViewModel.provideFactory(apolloClient)
             )
 
             TimetablesRoute(

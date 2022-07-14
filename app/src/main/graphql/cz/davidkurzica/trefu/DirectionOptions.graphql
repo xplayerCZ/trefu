@@ -1,0 +1,11 @@
+query DirectionOptions($lineId: ID!) {
+    line(id: $lineId) {
+        routes {
+            lastRouteStop {
+                stop {
+                    name
+                }
+            }
+        }
+    }
+}
