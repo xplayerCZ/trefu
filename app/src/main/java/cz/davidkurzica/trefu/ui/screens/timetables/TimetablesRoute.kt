@@ -22,9 +22,9 @@ fun TimetablesRoute(
     TimetablesRoute(
         uiState = uiState,
         onFormSubmit = { timetablesViewModel.submitForm(it) },
-        onLineUpdate = { timetablesViewModel.updateLine(it) },
-        onStopUpdate = { timetablesViewModel.updateStop(it) },
-        onDirectionUpdate = { timetablesViewModel.updateDirection(it) },
+        onLineChange = { timetablesViewModel.updateLine(it) },
+        onStopChange = { timetablesViewModel.updateStop(it) },
+        onDirectionChange = { timetablesViewModel.updateDirection(it) },
         onFormClean = { timetablesViewModel.cleanForm() },
         onErrorDismiss = { timetablesViewModel.errorShown(it) },
         closeResults = { timetablesViewModel.closeResults() },
@@ -38,13 +38,13 @@ fun TimetablesRoute(
     uiState: TimetablesUiState,
     onFormSubmit: (TimetablesFormData) -> Unit,
     onFormClean: () -> Unit,
-    onLineUpdate: (Line) -> Unit,
-    onStopUpdate: (Stop) -> Unit,
-    onDirectionUpdate: (Direction) -> Unit,
+    onLineChange: (Line) -> Unit,
+    onStopChange: (Stop) -> Unit,
+    onDirectionChange: (Direction) -> Unit,
     onErrorDismiss: (Long) -> Unit,
     closeResults: () -> Unit,
     openDrawer: () -> Unit,
-    scaffoldState: ScaffoldState
+    scaffoldState: ScaffoldState,
 ) {
     when (getTimetablesScreenType(uiState)) {
         TimetablesScreenType.Form -> {
@@ -52,9 +52,9 @@ fun TimetablesRoute(
                 uiState = uiState as TimetablesUiState.Form,
                 onFormSubmit = onFormSubmit,
                 onFormClean = onFormClean,
-                onLineUpdate = onLineUpdate,
-                onStopUpdate = onStopUpdate,
-                onDirectionUpdate = onDirectionUpdate,
+                onLineChange = onLineChange,
+                onStopChange = onStopChange,
+                onDirectionChange = onDirectionChange,
                 onErrorDismiss = onErrorDismiss,
                 openDrawer = openDrawer,
                 scaffoldState = scaffoldState,
@@ -80,7 +80,6 @@ private enum class TimetablesScreenType {
     Results,
 }
 
-@Composable
 private fun getTimetablesScreenType(
     uiState: TimetablesUiState
 ): TimetablesScreenType = when (uiState.isResultsOpen) {

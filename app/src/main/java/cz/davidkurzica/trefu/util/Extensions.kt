@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.adapter
+package cz.davidkurzica.trefu.util
 
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Query

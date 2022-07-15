@@ -1,6 +1,5 @@
 package cz.davidkurzica.trefu.ui.screens.timetables
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -9,12 +8,10 @@ import cz.davidkurzica.trefu.DirectionOptionsQuery
 import cz.davidkurzica.trefu.LineOptionsQuery
 import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.StopOptionsQuery
-import cz.davidkurzica.trefu.adapter.queryResult
 import cz.davidkurzica.trefu.data.Result
 import cz.davidkurzica.trefu.model.*
-import cz.davidkurzica.trefu.util.ErrorMessage
-import cz.davidkurzica.trefu.util.toLine
-import cz.davidkurzica.trefu.util.toStop
+import cz.davidkurzica.trefu.util.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -71,18 +68,17 @@ private data class TimetablesViewModelState(
     val lines: List<Line> = emptyList(),
     val directions: List<Direction> = emptyList(),
     val timetables: Timetable? = null,
-    val isFormLoading: Boolean = false,
-    val isResultsLoading: Boolean = false,
+    val isLoading: Boolean = false,
     val showResults: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
 ) {
 
     fun toUiState(): TimetablesUiState =
         if (!showResults) {
-            if (isFormLoading || stops.isEmpty() || lines.isEmpty() || directions.isEmpty()) {
+            if (isLoading || stops.isEmpty() || lines.isEmpty() || directions.isEmpty()) {
                 TimetablesUiState.Form.NoData(
                     isResultsOpen = showResults,
-                    isLoading = isFormLoading,
+                    isLoading = isLoading,
                     errorMessages = errorMessages
                 )
             } else {
@@ -96,22 +92,22 @@ private data class TimetablesViewModelState(
                     lines = lines,
                     directions = directions,
                     isResultsOpen = showResults,
-                    isLoading = isFormLoading,
+                    isLoading = isLoading,
                     errorMessages = errorMessages
                 )
             }
         } else {
-            if(isResultsLoading || timetables == null) {
+            if (isLoading || timetables == null) {
                 TimetablesUiState.Results.NoResults(
                     isResultsOpen = showResults,
-                    isLoading = isFormLoading,
+                    isLoading = isLoading,
                     errorMessages = errorMessages
                 )
             } else {
                 TimetablesUiState.Results.HasResults(
                     timetables = timetables,
                     isResultsOpen = showResults,
-                    isLoading = isFormLoading,
+                    isLoading = isLoading,
                     errorMessages = errorMessages
                 )
             }
@@ -134,7 +130,7 @@ class TimetablesViewModel(
 
 
     init {
-        launchWithLoading { updateStops() }
+        viewModelScope.launchWithLoading { updateStops() }
     }
 
     fun errorShown(errorId: Long) {
@@ -148,7 +144,7 @@ class TimetablesViewModel(
         val result = apolloClient.queryResult(StopOptionsQuery())
         viewModelState.update {
             when (result) {
-                is Result.Success -> it.copy(stops = result.data.stops.map { orig -> orig.toStop() })
+                is Result.Success -> it.copy(stops = result.data.toStops())
                 is Result.Error -> {
                     val errorMessages = it.errorMessages + ErrorMessage(
                         id = UUID.randomUUID().mostSignificantBits,
@@ -168,7 +164,7 @@ class TimetablesViewModel(
         viewModelState.update {
             when (result) {
                 is Result.Success -> it.copy(
-                    lines = result.data.stop.routeStops.map { routeStop -> routeStop.route.line.toLine() },
+                    lines = result.data.toLines(),
                     selectedLine = null,
                 )
                 is Result.Error -> {
@@ -190,12 +186,7 @@ class TimetablesViewModel(
         viewModelState.update {
             when (result) {
                 is Result.Success -> it.copy(
-                    directions = result.data.line.routes.mapIndexed { i, route ->
-                        Direction(
-                            i,
-                            route.lastRouteStop.first().stop.name
-                        )
-                    },
+                    directions = result.data.toDirections(),
                     selectedDirection = null,
                 )
                 is Result.Error -> {
@@ -207,12 +198,10 @@ class TimetablesViewModel(
                 }
             }
         }
-
-        Log.d("Directions", viewModelState.value.directions.toString())
     }
 
     fun submitForm(formData: TimetablesFormData, date: LocalDate = LocalDate.now()) {
-        viewModelState.update { it.copy(showResults = true, isResultsLoading = true) }
+        viewModelState.update { it.copy(showResults = true, isLoading = true) }
 
         viewModelScope.launch {
             val result = Result.Success(
@@ -224,13 +213,13 @@ class TimetablesViewModel(
             ) as Result<Timetable>
             viewModelState.update {
                 when (result) {
-                    is Result.Success -> it.copy(timetables = result.data, isResultsLoading = false)
+                    is Result.Success -> it.copy(timetables = result.data, isLoading = false)
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
                             messageId = R.string.load_error
                         )
-                        it.copy(errorMessages = errorMessages, isResultsLoading = false)
+                        it.copy(errorMessages = errorMessages, isLoading = false)
                     }
                 }
             }
@@ -246,7 +235,8 @@ class TimetablesViewModel(
     }
 
     fun updateLine(line: Line) {
-        launchWithLoading { updateDirections(line.id) }
+        viewModelState.update { it.copy(selectedLine = line) }
+        viewModelScope.launchWithLoading { updateDirections(line.id) }
     }
 
     fun updateDirection(direction: Direction) {
@@ -254,20 +244,21 @@ class TimetablesViewModel(
     }
 
     fun updateStop(stop: Stop) {
-        launchWithLoading { updateLines(stop.id) }
+        viewModelState.update { it.copy(selectedStop = stop) }
+        viewModelScope.launchWithLoading { updateLines(stop.id) }
     }
 
-    private fun launchWithLoading(block: suspend () -> Unit) {
-        viewModelState.update { it.copy(isFormLoading = true) }
-        viewModelScope.launch {
+    private fun CoroutineScope.launchWithLoading(block: suspend () -> Unit) {
+        viewModelState.update { it.copy(isLoading = true) }
+        this.launch {
             block()
-            viewModelState.update { it.copy(isFormLoading = false) }
+            viewModelState.update { it.copy(isLoading = false) }
         }
     }
 
     companion object {
         fun provideFactory(
-            apolloClient: ApolloClient
+            apolloClient: ApolloClient,
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
