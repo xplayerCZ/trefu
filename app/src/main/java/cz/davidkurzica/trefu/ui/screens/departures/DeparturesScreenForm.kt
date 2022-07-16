@@ -13,8 +13,8 @@ import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.model.Stop
 import cz.davidkurzica.trefu.ui.components.FullScreenLoading
 import cz.davidkurzica.trefu.ui.components.LoadingContent
+import cz.davidkurzica.trefu.ui.components.TrefuDefaultTopAppBar
 import cz.davidkurzica.trefu.ui.components.departures.DeparturesForm
-import cz.davidkurzica.trefu.ui.components.departures.DeparturesFormTopAppBar
 import java.time.LocalTime
 
 @Composable
@@ -66,8 +66,9 @@ private fun DeparturesScreenWithForm(
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            DeparturesFormTopAppBar(
+            TrefuDefaultTopAppBar(
                 title = title,
+                iconDescription = stringResource(R.string.cd_open_navigation_drawer),
                 openDrawer = openDrawer
             )
         },

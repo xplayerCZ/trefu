@@ -11,10 +11,9 @@ import androidx.compose.ui.res.stringResource
 import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.ui.components.FullScreenLoading
 import cz.davidkurzica.trefu.ui.components.LoadingContent
+import cz.davidkurzica.trefu.ui.components.TrefuReturnTopAppBar
 import cz.davidkurzica.trefu.ui.components.TrefuSnackbarHost
 import cz.davidkurzica.trefu.ui.components.connections.ConnectionsList
-import cz.davidkurzica.trefu.ui.components.connections.ConnectionsResultsTopAppBar
-
 
 @Composable
 fun ResultsScreen(
@@ -56,9 +55,10 @@ private fun ConnectionsScreenWithList(
         scaffoldState = scaffoldState,
         snackbarHost = { TrefuSnackbarHost(hostState = it) },
         topBar = {
-            ConnectionsResultsTopAppBar(
+            TrefuReturnTopAppBar(
                 title = title,
-                closeResults = closeResults,
+                iconDescription = stringResource(R.string.cd_close_connections_results),
+                onIconClick = closeResults
             )
         },
         modifier = modifier

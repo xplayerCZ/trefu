@@ -1,9 +1,7 @@
 package cz.davidkurzica.trefu.ui.components.timetables
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -12,19 +10,18 @@ import cz.davidkurzica.trefu.model.Direction
 import cz.davidkurzica.trefu.model.Line
 import cz.davidkurzica.trefu.model.Stop
 import cz.davidkurzica.trefu.model.TimetablesFormData
+import cz.davidkurzica.trefu.ui.components.selector.DirectionSelector
+import cz.davidkurzica.trefu.ui.components.selector.FocusableLineSelector
+import cz.davidkurzica.trefu.ui.components.selector.FocusableStopSelector
 import cz.davidkurzica.trefu.ui.screens.timetables.FocusStates
 import cz.davidkurzica.trefu.ui.theme.TrefuTheme
 
 @Composable
 fun TimetablesForm(
     modifier: Modifier = Modifier,
-    lines: List<Line>,
     directions: List<Direction>,
-    stops: List<Stop>,
     formData: TimetablesFormData,
     onDirectionChange: (Direction) -> Unit,
-    onLineChange: (Line) -> Unit,
-    onStopChange: (Stop) -> Unit,
     onFocusChange: (FocusStates) -> Unit,
 ) {
     Box(
@@ -36,97 +33,21 @@ fun TimetablesForm(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            TimetablesStopSelector(
+            FocusableStopSelector(
                 selectedStop = formData.selectedStop,
                 onClick = { onFocusChange(FocusStates.Stop) },
             )
             Spacer(Modifier.size(16.dp))
-            TimetablesLineSelector(
+            FocusableLineSelector(
                 selectedLine = formData.selectedLine,
                 onClick = { onFocusChange(FocusStates.Line) },
             )
             Spacer(Modifier.size(16.dp))
-            TimetablesDirectionSelector(
+            DirectionSelector(
                 selectedDirection = formData.selectedDirection,
                 onSelectedDirectionChange = onDirectionChange,
                 directions
             )
-        }
-    }
-}
-
-@Composable
-fun TimetablesStopSelector(
-    selectedStop: Stop,
-    onClick: () -> Unit,
-) {
-    TextField(
-        value = selectedStop.name,
-        onValueChange = { },
-        modifier = Modifier.clickable { onClick() },
-        label = { Text("Stop") },
-        enabled = false,
-    )
-}
-
-@Composable
-fun TimetablesLineSelector(
-    selectedLine: Line,
-    onClick: () -> Unit,
-) {
-    TextField(
-        value = selectedLine.shortCode,
-        onValueChange = { },
-        modifier = Modifier.clickable { onClick() },
-        label = { Text("Line") },
-        enabled = false,
-    )
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun TimetablesDirectionSelector(
-    selectedDirection: Direction,
-    onSelectedDirectionChange: (Direction) -> Unit,
-    options: List<Direction>
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = {
-            expanded = !expanded
-        }
-    ) {
-        TextField(
-            readOnly = true,
-            value = selectedDirection.description,
-            onValueChange = { },
-            label = { Text("Direction") },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded
-                )
-            }
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = {
-                expanded = false
-            }
-        ) {
-            options.forEach { item ->
-                DropdownMenuItem(
-                    onClick = {
-                        if (item != selectedDirection) {
-                            onSelectedDirectionChange(item)
-                        }
-                        expanded = false
-                    }
-                ) {
-                    Text(text = item.description)
-                }
-            }
         }
     }
 }
@@ -136,9 +57,7 @@ fun TimetablesDirectionSelector(
 fun TimetablesFormPreview() {
     TrefuTheme {
         TimetablesForm(
-            lines = listOf(),
             directions = listOf(),
-            stops = listOf(),
             formData = TimetablesFormData(
                 selectedStop = Stop(
                     id = -1,
@@ -155,8 +74,6 @@ fun TimetablesFormPreview() {
                 )
             ),
             onDirectionChange = {},
-            onLineChange = {},
-            onStopChange = {},
             onFocusChange = {},
         )
     }

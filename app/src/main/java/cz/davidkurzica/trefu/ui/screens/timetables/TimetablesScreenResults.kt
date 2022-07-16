@@ -11,9 +11,9 @@ import androidx.compose.ui.res.stringResource
 import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.ui.components.FullScreenLoading
 import cz.davidkurzica.trefu.ui.components.LoadingContent
+import cz.davidkurzica.trefu.ui.components.TrefuReturnTopAppBar
 import cz.davidkurzica.trefu.ui.components.TrefuSnackbarHost
 import cz.davidkurzica.trefu.ui.components.timetables.TimetablesList
-import cz.davidkurzica.trefu.ui.components.timetables.TimetablesResultsTopAppBar
 
 @Composable
 fun ResultsScreen(
@@ -55,9 +55,10 @@ private fun TimetablesScreenWithList(
         scaffoldState = scaffoldState,
         snackbarHost = { TrefuSnackbarHost(hostState = it) },
         topBar = {
-            TimetablesResultsTopAppBar(
+            TrefuReturnTopAppBar(
                 title = title,
-                closeResults = closeResults,
+                iconDescription = stringResource(id = R.string.cd_close_timetables_results),
+                onIconClick = closeResults,
             )
         },
         modifier = modifier

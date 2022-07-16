@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.ui.components.timetables
+package cz.davidkurzica.trefu.ui.components
 
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -8,14 +8,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import cz.davidkurzica.trefu.R
 
 @Composable
-fun TimetablesFormTopAppBar(
+fun TrefuDefaultTopAppBar(
     title: String,
-    openDrawer: () -> Unit
+    iconDescription: String,
+    openDrawer: () -> Unit,
 ) {
     TopAppBar(
         title = {
@@ -25,7 +24,7 @@ fun TimetablesFormTopAppBar(
             IconButton(onClick = openDrawer) {
                 Icon(
                     imageVector = Icons.Filled.Menu,
-                    contentDescription = stringResource(R.string.cd_open_navigation_drawer),
+                    contentDescription = iconDescription,
                 )
             }
         },
@@ -34,19 +33,20 @@ fun TimetablesFormTopAppBar(
 }
 
 @Composable
-fun TimetablesResultsTopAppBar(
+fun TrefuReturnTopAppBar(
     title: String,
-    closeResults: () -> Unit
+    iconDescription: String,
+    onIconClick: () -> Unit,
 ) {
     TopAppBar(
         title = {
             Text(title)
         },
         navigationIcon = {
-            IconButton(onClick = closeResults) {
+            IconButton(onClick = onIconClick) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.cd_close_timetables_results),
+                    contentDescription = iconDescription,
                 )
             }
         },

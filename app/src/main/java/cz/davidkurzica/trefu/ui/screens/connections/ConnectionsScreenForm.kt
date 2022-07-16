@@ -13,8 +13,8 @@ import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.model.ConnectionsFormData
 import cz.davidkurzica.trefu.ui.components.FullScreenLoading
 import cz.davidkurzica.trefu.ui.components.LoadingContent
+import cz.davidkurzica.trefu.ui.components.TrefuDefaultTopAppBar
 import cz.davidkurzica.trefu.ui.components.connections.ConnectionsForm
-import cz.davidkurzica.trefu.ui.components.connections.ConnectionsFormTopAppBar
 
 @Composable
 fun FormScreen(
@@ -62,8 +62,9 @@ private fun ConnectionsScreenWithForm(
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            ConnectionsFormTopAppBar(
+            TrefuDefaultTopAppBar(
                 title = title,
+                iconDescription = stringResource(R.string.cd_open_navigation_drawer),
                 openDrawer = openDrawer
             )
         },

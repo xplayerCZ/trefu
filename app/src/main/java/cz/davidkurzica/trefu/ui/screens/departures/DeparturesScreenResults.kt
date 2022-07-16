@@ -11,9 +11,9 @@ import androidx.compose.ui.res.stringResource
 import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.ui.components.FullScreenLoading
 import cz.davidkurzica.trefu.ui.components.LoadingContent
+import cz.davidkurzica.trefu.ui.components.TrefuReturnTopAppBar
 import cz.davidkurzica.trefu.ui.components.TrefuSnackbarHost
 import cz.davidkurzica.trefu.ui.components.departures.DeparturesList
-import cz.davidkurzica.trefu.ui.components.departures.DeparturesResultsTopAppBar
 
 
 @Composable
@@ -56,9 +56,10 @@ private fun DeparturesScreenWithList(
         scaffoldState = scaffoldState,
         snackbarHost = { TrefuSnackbarHost(hostState = it) },
         topBar = {
-            DeparturesResultsTopAppBar(
+            TrefuReturnTopAppBar(
                 title = title,
-                closeResults = closeResults,
+                iconDescription = stringResource(R.string.cd_close_departures_results),
+                onIconClick = closeResults
             )
         },
         modifier = modifier
