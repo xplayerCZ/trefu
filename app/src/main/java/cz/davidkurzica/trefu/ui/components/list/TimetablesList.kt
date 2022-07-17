@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.ui.components.timetables
+package cz.davidkurzica.trefu.ui.components.list
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun TimetablesList(
     modifier: Modifier = Modifier,
-    timetable: Timetable
+    timetable: Timetable,
 ) {
     Column {
         Row(
@@ -51,7 +51,7 @@ fun TimetablesList(
 
 @Composable
 fun TimetableItem(
-    timetable: DepartureSimple
+    timetable: DepartureSimple,
 ) {
     Card(
         elevation = 4.dp

@@ -21,43 +21,43 @@ fun TrefuApp(
     apolloClient: ApolloClient,
 ) {
     TrefuTheme(darkTheme = false) {
-            val navController = rememberNavController()
-            val navigationActions = remember(navController) {
-                TrefuNavigationActions(navController)
-            }
+        val navController = rememberNavController()
+        val navigationActions = remember(navController) {
+            TrefuNavigationActions(navController)
+        }
 
-            val coroutineScope = rememberCoroutineScope()
+        val coroutineScope = rememberCoroutineScope()
 
-            val navBackStackEntry by navController.currentBackStackEntryAsState()
-            val currentRoute =
-                navBackStackEntry?.destination?.route ?: TrefuDestinations.HOME_ROUTE
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute =
+            navBackStackEntry?.destination?.route ?: TrefuDestinations.HOME_ROUTE
 
-            val drawerState = rememberDrawerState(DrawerValue.Closed)
+        val drawerState = rememberDrawerState(DrawerValue.Closed)
 
-            ModalDrawer(
-                drawerContent = {
-                    AppDrawer(
-                        currentRoute = currentRoute,
-                        navigateToHome = navigationActions.navigateToHome,
-                        navigateToDepartures = navigationActions.navigateToDepartures,
-                        navigateToConnections = navigationActions.navigateToConnections,
-                        navigateToTimetables = navigationActions.navigateToTimetables,
-                        closeDrawer = { coroutineScope.launch { drawerState.close() } },
-                    )
-                },
-                drawerState = drawerState,
-                gesturesEnabled = true
+        ModalDrawer(
+            drawerContent = {
+                AppDrawer(
+                    currentRoute = currentRoute,
+                    navigateToHome = navigationActions.navigateToHome,
+                    navigateToDepartures = navigationActions.navigateToDepartures,
+                    navigateToConnections = navigationActions.navigateToConnections,
+                    navigateToTimetables = navigationActions.navigateToTimetables,
+                    closeDrawer = { coroutineScope.launch { drawerState.close() } },
+                )
+            },
+            drawerState = drawerState,
+            gesturesEnabled = true
+        ) {
+            Row(
+                Modifier
+                    .fillMaxSize()
             ) {
-                Row(
-                    Modifier
-                        .fillMaxSize()
-                ) {
-                    TrefuNavGraph(
-                        apolloClient = apolloClient,
-                        navController = navController,
-                        openDrawer = { coroutineScope.launch { drawerState.open() } }
-                    )
-                }
+                TrefuNavGraph(
+                    apolloClient = apolloClient,
+                    navController = navController,
+                    openDrawer = { coroutineScope.launch { drawerState.open() } }
+                )
             }
         }
+    }
 }

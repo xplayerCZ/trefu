@@ -1,31 +1,31 @@
 type Query {
-  stops(filter: StopFilters): [Stop!]!
+    stops(filter: StopFilters): [Stop!]!
 
-  stop(id: ID!): Stop!
+    stop(id: ID!): Stop!
 
-  routes(filter: RouteFilters): [Route!]!
+    routes(filter: RouteFilters): [Route!]!
 
-  route(id: ID!): Route!
+    route(id: ID!): Route!
 
-  packets(filter: PacketFilters): [Packet!]!
+    packets(filter: PacketFilters): [Packet!]!
 
-  packet(id: ID!): Packet!
+    packet(id: ID!): Packet!
 
-  lines(filter: LineFilters): [Line!]!
+    lines(filter: LineFilters): [Line!]!
 
-  line(id: ID!): Line!
+    line(id: ID!): Line!
 
-  connections(filter: ConnectionFilters): [Connection!]!
+    connections(filter: ConnectionFilters): [Connection!]!
 
-  connection(id: ID!): Connection!
+    connection(id: ID!): Connection!
 
-  departures(filter: DepartureFilters): [Departure!]!
+    departures(filter: DepartureFilters): [Departure!]!
 
-  departure(id: ID!): Departure!
+    departure(id: ID!): Departure!
 
-  rules(filter: RuleFilters): [Rule!]!
+    rules(filter: RuleFilters): [Rule!]!
 
-  rule(id: ID!): Rule!
+    rule(id: ID!): Rule!
 }
 
 scalar Date
@@ -33,183 +33,183 @@ scalar Date
 scalar Time
 
 input StopFilters {
-  offset: Int
+    offset: Int
 
-  limit: Int
+    limit: Int
 
-  packetId: Int
+    packetId: Int
 }
 
 type Stop {
-  id: ID!
+    id: ID!
 
-  name: String!
+    name: String!
 
-  latitude: String!
+    latitude: String!
 
-  longitude: String!
+    longitude: String!
 
-  code: Int!
+    code: Int!
 
-  enabled: Boolean!
+    enabled: Boolean!
 
-  routeStops: [RouteStop!]!
+    routeStops: [RouteStop!]!
 }
 
 input RouteFilters {
-  offset: Int
+    offset: Int
 
-  limit: Int
+    limit: Int
 
-  lineId: Int
+    lineId: Int
 
-  direction: Int
+    direction: Int
 
-  packetId: Int
+    packetId: Int
 }
 
 type Route {
-  id: ID!
+    id: ID!
 
-  length: Int!
+    length: Int!
 
-  direction: Int!
+    direction: Int!
 
-  firstRouteStop: [RouteStop!]!
+    firstRouteStop: [RouteStop!]!
 
-  lastRouteStop: [RouteStop!]!
+    lastRouteStop: [RouteStop!]!
 
-  routeStops: [RouteStop!]!
+    routeStops: [RouteStop!]!
 
-  connections: [Connection!]!
+    connections: [Connection!]!
 
-  line: Line!
+    line: Line!
 }
 
 type RouteStop {
-  route: Route!
+    route: Route!
 
-  stop: Stop!
+    stop: Stop!
 
-  index: Int!
+    index: Int!
 
-  served: [RouteStop!]!
+    served: [RouteStop!]!
 }
 
 input PacketFilters {
-  offset: Int
+    offset: Int
 
-  limit: Int
+    limit: Int
 
-  activeAfter: Date
+    activeAfter: Date
 
-  activeBefore: Date
+    activeBefore: Date
 
-  code: Int
+    code: Int
 
-  valid: Boolean
+    valid: Boolean
 }
 
 type Packet {
-  id: ID!
+    id: ID!
 
-  activeFrom: Date!
+    activeFrom: Date!
 
-  activeTo: Date!
+    activeTo: Date!
 
-  code: Int!
+    code: Int!
 
-  valid: Boolean!
+    valid: Boolean!
 
-  lines: [Line!]!
+    lines: [Line!]!
 }
 
 input LineFilters {
-  offset: Int
+    offset: Int
 
-  limit: Int
+    limit: Int
 
-  packetId: Int
+    packetId: Int
 }
 
 type Line {
-  id: ID!
+    id: ID!
 
-  shortCode: String!
+    shortCode: String!
 
-  fullCode: Int!
+    fullCode: Int!
 
-  packet: Packet!
+    packet: Packet!
 
-  routes: [Route!]!
+    routes: [Route!]!
 }
 
 input ConnectionFilters {
-  offset: Int
+    offset: Int
 
-  limit: Int
+    limit: Int
 
-  routeId: Int
+    routeId: Int
 
-  packetId: Int
+    packetId: Int
 }
 
 type Connection {
-  id: ID!
+    id: ID!
 
-  route: [Route!]!
+    route: [Route!]!
 
-  number: Int!
+    number: Int!
 
-  departures: [Departure!]!
+    departures: [Departure!]!
 
-  connectionRules: [ConnectionRule!]!
+    connectionRules: [ConnectionRule!]!
 }
 
 input DepartureFilters {
-  offset: Int
+    offset: Int
 
-  limit: Int
+    limit: Int
 
-  connectionId: Int
+    connectionId: Int
 
-  index: Int
+    index: Int
 
-  after: Time
+    after: Time
 
-  before: Time
+    before: Time
 
-  packetId: Int
+    packetId: Int
 }
 
 type Departure {
-  id: ID!
+    id: ID!
 
-  time: Time
+    time: Time
 
-  connection: Connection!
+    connection: Connection!
 }
 
 type ConnectionRule {
-  connection: Connection!
+    connection: Connection!
 
-  rule: Rule!
+    rule: Rule!
 }
 
 input RuleFilters {
-  limit: Int
+    limit: Int
 
-  offset: Int
+    offset: Int
 }
 
 type Rule {
-  id: ID!
+    id: ID!
 
-  description: String!
+    description: String!
 
-  connectionRules: [ConnectionRule!]!
+    connectionRules: [ConnectionRule!]!
 }
 
 schema {
-  query: Query
+    query: Query
 }

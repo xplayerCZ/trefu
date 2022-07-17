@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.ui.components.departures
+package cz.davidkurzica.trefu.ui.components.list
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun DeparturesList(
     modifier: Modifier = Modifier,
-    departureWithLines: List<DepartureWithLine>
+    departureWithLines: List<DepartureWithLine>,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -34,7 +34,7 @@ fun DeparturesList(
 
 @Composable
 fun DepartureItem(
-    departureWithLine: DepartureWithLine
+    departureWithLine: DepartureWithLine,
 ) {
     Card(
         elevation = 4.dp

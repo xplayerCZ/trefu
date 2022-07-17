@@ -6,21 +6,24 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import cz.davidkurzica.trefu.model.ConnectionsFormData
+import cz.davidkurzica.trefu.model.Stop
+import java.time.LocalTime
 
 @Composable
 fun ConnectionsRoute(
     connectionsViewModel: ConnectionsViewModel,
     openDrawer: () -> Unit,
-    scaffoldState: ScaffoldState = rememberScaffoldState()
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
 ) {
     val uiState by connectionsViewModel.uiState.collectAsState()
 
     ConnectionsRoute(
         uiState = uiState,
-        onFormSubmit = { connectionsViewModel.submitForm(it) },
-        onFormUpdate = { connectionsViewModel.updateForm(it) },
+        onFormSubmit = { connectionsViewModel.submitForm() },
         onFormClean = { connectionsViewModel.cleanForm() },
+        onStopFromChange = { connectionsViewModel.updateFromStop(it) },
+        onStopToChange = { connectionsViewModel.updateToStop(it) },
+        onTimeChange = { connectionsViewModel.updateTime(it) },
         onErrorDismiss = { connectionsViewModel.errorShown(it) },
         closeResults = { connectionsViewModel.closeResults() },
         openDrawer = openDrawer,
@@ -31,13 +34,15 @@ fun ConnectionsRoute(
 @Composable
 fun ConnectionsRoute(
     uiState: ConnectionsUiState,
-    onFormSubmit: (ConnectionsFormData) -> Unit,
+    onFormSubmit: () -> Unit,
     onFormClean: () -> Unit,
-    onFormUpdate: (ConnectionsFormData) -> Unit,
+    onStopFromChange: (Stop) -> Unit,
+    onStopToChange: (Stop) -> Unit,
+    onTimeChange: (LocalTime) -> Unit,
     onErrorDismiss: (Long) -> Unit,
     closeResults: () -> Unit,
     openDrawer: () -> Unit,
-    scaffoldState: ScaffoldState
+    scaffoldState: ScaffoldState,
 ) {
     when (getConnectionsScreenType(uiState)) {
         ConnectionsScreenType.Form -> {
@@ -45,7 +50,9 @@ fun ConnectionsRoute(
                 uiState = uiState as ConnectionsUiState.Form,
                 onFormSubmit = onFormSubmit,
                 onFormClean = onFormClean,
-                onFormUpdate = onFormUpdate,
+                onStopFromChange = onStopFromChange,
+                onStopToChange = onStopToChange,
+                onTimeChange = onTimeChange,
                 onErrorDismiss = onErrorDismiss,
                 openDrawer = openDrawer,
                 scaffoldState = scaffoldState,
@@ -73,7 +80,7 @@ private enum class ConnectionsScreenType {
 
 @Composable
 private fun getConnectionsScreenType(
-    uiState: ConnectionsUiState
+    uiState: ConnectionsUiState,
 ): ConnectionsScreenType = when (uiState.isResultsOpen) {
     false -> ConnectionsScreenType.Form
     true -> ConnectionsScreenType.Results

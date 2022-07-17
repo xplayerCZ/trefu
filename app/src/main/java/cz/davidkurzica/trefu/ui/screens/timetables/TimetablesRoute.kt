@@ -9,19 +9,18 @@ import androidx.compose.runtime.getValue
 import cz.davidkurzica.trefu.model.Direction
 import cz.davidkurzica.trefu.model.Line
 import cz.davidkurzica.trefu.model.Stop
-import cz.davidkurzica.trefu.model.TimetablesFormData
 
 @Composable
 fun TimetablesRoute(
     timetablesViewModel: TimetablesViewModel,
     openDrawer: () -> Unit,
-    scaffoldState: ScaffoldState = rememberScaffoldState()
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
 ) {
     val uiState by timetablesViewModel.uiState.collectAsState()
 
     TimetablesRoute(
         uiState = uiState,
-        onFormSubmit = { timetablesViewModel.submitForm(it) },
+        onFormSubmit = { timetablesViewModel.submitForm() },
         onLineChange = { timetablesViewModel.updateLine(it) },
         onStopChange = { timetablesViewModel.updateStop(it) },
         onDirectionChange = { timetablesViewModel.updateDirection(it) },
@@ -36,7 +35,7 @@ fun TimetablesRoute(
 @Composable
 fun TimetablesRoute(
     uiState: TimetablesUiState,
-    onFormSubmit: (TimetablesFormData) -> Unit,
+    onFormSubmit: () -> Unit,
     onFormClean: () -> Unit,
     onLineChange: (Line) -> Unit,
     onStopChange: (Stop) -> Unit,
@@ -81,7 +80,7 @@ private enum class TimetablesScreenType {
 }
 
 private fun getTimetablesScreenType(
-    uiState: TimetablesUiState
+    uiState: TimetablesUiState,
 ): TimetablesScreenType = when (uiState.isResultsOpen) {
     false -> TimetablesScreenType.Form
     true -> TimetablesScreenType.Results

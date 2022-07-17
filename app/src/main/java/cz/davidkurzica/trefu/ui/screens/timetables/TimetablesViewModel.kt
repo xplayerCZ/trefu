@@ -9,7 +9,10 @@ import cz.davidkurzica.trefu.LineOptionsQuery
 import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.StopOptionsQuery
 import cz.davidkurzica.trefu.data.Result
-import cz.davidkurzica.trefu.model.*
+import cz.davidkurzica.trefu.model.Direction
+import cz.davidkurzica.trefu.model.Line
+import cz.davidkurzica.trefu.model.Stop
+import cz.davidkurzica.trefu.model.Timetable
 import cz.davidkurzica.trefu.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
@@ -26,19 +29,21 @@ sealed interface TimetablesUiState {
         val isLoading: Boolean
 
         data class HasData(
-            val formData: TimetablesFormData,
+            val selectedStop: Stop,
+            val selectedLine: Line,
+            val selectedDirection: Direction,
             val stops: List<Stop>,
             val lines: List<Line>,
             val directions: List<Direction>,
             override val isResultsOpen: Boolean,
             override val isLoading: Boolean,
-            override val errorMessages: List<ErrorMessage>
+            override val errorMessages: List<ErrorMessage>,
         ) : Form
 
         data class NoData(
             override val isResultsOpen: Boolean,
             override val isLoading: Boolean,
-            override val errorMessages: List<ErrorMessage>
+            override val errorMessages: List<ErrorMessage>,
         ) : Form
     }
 
@@ -52,6 +57,7 @@ sealed interface TimetablesUiState {
             override val isLoading: Boolean,
             override val errorMessages: List<ErrorMessage>,
         ) : Results
+
         data class NoResults(
             override val isResultsOpen: Boolean,
             override val isLoading: Boolean,
@@ -83,11 +89,9 @@ private data class TimetablesViewModelState(
                 )
             } else {
                 TimetablesUiState.Form.HasData(
-                    formData = TimetablesFormData(
-                        selectedStop = selectedStop ?: stops.first(),
-                        selectedLine = selectedLine ?: lines.first(),
-                        selectedDirection = selectedDirection ?: directions.first()
-                    ),
+                    selectedStop = selectedStop ?: stops.first(),
+                    selectedLine = selectedLine ?: lines.first(),
+                    selectedDirection = selectedDirection ?: directions.first(),
                     stops = stops,
                     lines = lines,
                     directions = directions,
@@ -115,7 +119,7 @@ private data class TimetablesViewModelState(
 }
 
 class TimetablesViewModel(
-    private val apolloClient: ApolloClient
+    private val apolloClient: ApolloClient,
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(TimetablesViewModelState())
@@ -200,7 +204,7 @@ class TimetablesViewModel(
         }
     }
 
-    fun submitForm(formData: TimetablesFormData, date: LocalDate = LocalDate.now()) {
+    fun submitForm() {
         viewModelState.update { it.copy(showResults = true, isLoading = true) }
 
         viewModelScope.launch {

@@ -13,14 +13,13 @@ import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.model.Direction
 import cz.davidkurzica.trefu.model.Line
 import cz.davidkurzica.trefu.model.Stop
-import cz.davidkurzica.trefu.model.TimetablesFormData
 import cz.davidkurzica.trefu.ui.components.FullScreenLoading
 import cz.davidkurzica.trefu.ui.components.FullScreenSelection
 import cz.davidkurzica.trefu.ui.components.LoadingContent
 import cz.davidkurzica.trefu.ui.components.TrefuDefaultTopAppBar
-import cz.davidkurzica.trefu.ui.components.timetables.TimetablesForm
+import cz.davidkurzica.trefu.ui.components.form.TimetablesForm
 
-enum class FocusStates {
+enum class TimetablesFocusState {
     Stop,
     Line,
     None,
@@ -29,7 +28,7 @@ enum class FocusStates {
 @Composable
 fun FormScreen(
     uiState: TimetablesUiState.Form,
-    onFormSubmit: (TimetablesFormData) -> Unit,
+    onFormSubmit: () -> Unit,
     onFormClean: () -> Unit,
     onDirectionChange: (Direction) -> Unit,
     onLineChange: (Line) -> Unit,
@@ -48,10 +47,10 @@ fun FormScreen(
         modifier = modifier
     ) { hasDataUiState, contentModifier ->
 
-        var focus by remember { mutableStateOf(FocusStates.None) }
+        var focus by remember { mutableStateOf(TimetablesFocusState.None) }
 
         when (focus) {
-            FocusStates.None -> TopAppBarScreen(
+            TimetablesFocusState.None -> TimetablesTopAppBarScreen(
                 scaffoldState = scaffoldState,
                 openDrawer = openDrawer,
                 onFormSubmit = onFormSubmit,
@@ -59,26 +58,28 @@ fun FormScreen(
             ) {
                 TimetablesForm(
                     modifier = contentModifier,
-                    formData = hasDataUiState.formData,
                     directions = hasDataUiState.directions,
+                    selectedStop = hasDataUiState.selectedStop,
+                    selectedLine = hasDataUiState.selectedLine,
+                    selectedDirection = hasDataUiState.selectedDirection,
                     onDirectionChange = onDirectionChange,
                     onFocusChange = { focus = it },
                 )
             }
-            FocusStates.Stop -> FullScreenSelection(
+            TimetablesFocusState.Stop -> FullScreenSelection(
                 options = hasDataUiState.stops,
                 onSelectedChange = onStopChange,
-                selectedOption = hasDataUiState.formData.selectedStop,
+                selectedOption = hasDataUiState.selectedStop,
                 scaffoldState = scaffoldState,
-                onCloseSelection = { focus = FocusStates.None },
+                onCloseSelection = { focus = TimetablesFocusState.None },
                 displayValue = { it.name },
             )
-            FocusStates.Line -> FullScreenSelection(
+            TimetablesFocusState.Line -> FullScreenSelection(
                 options = hasDataUiState.lines,
                 onSelectedChange = onLineChange,
-                selectedOption = hasDataUiState.formData.selectedLine,
+                selectedOption = hasDataUiState.selectedLine,
                 scaffoldState = scaffoldState,
-                onCloseSelection = { focus = FocusStates.None },
+                onCloseSelection = { focus = TimetablesFocusState.None },
                 displayValue = { it.shortCode },
             )
         }
@@ -89,7 +90,7 @@ fun FormScreen(
 private fun TimetablesScreenWithForm(
     uiState: TimetablesUiState.Form,
     onErrorDismiss: (Long) -> Unit,
-    onFormSubmit: (TimetablesFormData) -> Unit,
+    onFormSubmit: () -> Unit,
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
@@ -104,7 +105,7 @@ private fun TimetablesScreenWithForm(
             is TimetablesUiState.Form.NoData -> uiState.isLoading
         },
         emptyContent = {
-            TimetableScreenLoading(
+            TimetablesScreenLoading(
                 scaffoldState = scaffoldState,
                 openDrawer = openDrawer,
                 onFormSubmit = onFormSubmit,
@@ -124,10 +125,27 @@ private fun TimetablesScreenWithForm(
 }
 
 @Composable
-fun TopAppBarScreen(
+fun TimetablesScreenLoading(
     scaffoldState: ScaffoldState,
     openDrawer: () -> Unit,
-    onFormSubmit: (TimetablesFormData) -> Unit,
+    onFormSubmit: () -> Unit,
+    uiState: TimetablesUiState.Form,
+) {
+    TimetablesTopAppBarScreen(
+        scaffoldState = scaffoldState,
+        openDrawer = openDrawer,
+        onFormSubmit = onFormSubmit,
+        uiState = uiState
+    ) {
+        FullScreenLoading()
+    }
+}
+
+@Composable
+fun TimetablesTopAppBarScreen(
+    scaffoldState: ScaffoldState,
+    openDrawer: () -> Unit,
+    onFormSubmit: () -> Unit,
     uiState: TimetablesUiState.Form,
     body: @Composable (Modifier) -> Unit,
 ) {
@@ -145,9 +163,7 @@ fun TopAppBarScreen(
         floatingActionButton = {
             if (uiState is TimetablesUiState.Form.HasData) {
                 FloatingActionButton(
-                    onClick = {
-                        onFormSubmit(uiState.formData)
-                    },
+                    onClick = onFormSubmit,
                     backgroundColor = MaterialTheme.colors.primary
                 ) {
                     Icon(
@@ -159,23 +175,6 @@ fun TopAppBarScreen(
         },
     ) {
         body(Modifier.padding(it))
-    }
-}
-
-@Composable
-fun TimetableScreenLoading(
-    scaffoldState: ScaffoldState,
-    openDrawer: () -> Unit,
-    onFormSubmit: (TimetablesFormData) -> Unit,
-    uiState: TimetablesUiState.Form,
-) {
-    TopAppBarScreen(
-        scaffoldState = scaffoldState,
-        openDrawer = openDrawer,
-        onFormSubmit = onFormSubmit,
-        uiState = uiState
-    ) {
-        FullScreenLoading()
     }
 }
 

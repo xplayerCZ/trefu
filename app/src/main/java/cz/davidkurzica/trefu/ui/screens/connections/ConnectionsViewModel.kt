@@ -9,13 +9,11 @@ import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.StopOptionsQuery
 import cz.davidkurzica.trefu.data.Result
 import cz.davidkurzica.trefu.model.Connection
-import cz.davidkurzica.trefu.model.ConnectionsFormData
 import cz.davidkurzica.trefu.model.Stop
 import cz.davidkurzica.trefu.util.ErrorMessage
 import cz.davidkurzica.trefu.util.toStop
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.time.LocalTime
 import java.util.*
 
@@ -28,17 +26,19 @@ sealed interface ConnectionsUiState {
         val isLoading: Boolean
 
         data class HasData(
-            val formData: ConnectionsFormData,
+            val selectedFromStop: Stop,
+            val selectedToStop: Stop,
+            val selectedTime: LocalTime,
             val stops: List<Stop>,
             override val isResultsOpen: Boolean,
             override val isLoading: Boolean,
-            override val errorMessages: List<ErrorMessage>
+            override val errorMessages: List<ErrorMessage>,
         ) : Form
 
         data class NoData(
             override val isResultsOpen: Boolean,
             override val isLoading: Boolean,
-            override val errorMessages: List<ErrorMessage>
+            override val errorMessages: List<ErrorMessage>,
         ) : Form
     }
 
@@ -52,6 +52,7 @@ sealed interface ConnectionsUiState {
             override val isLoading: Boolean,
             override val errorMessages: List<ErrorMessage>,
         ) : Results
+
         data class NoResults(
             override val isResultsOpen: Boolean,
             override val isLoading: Boolean,
@@ -61,10 +62,9 @@ sealed interface ConnectionsUiState {
 }
 
 private data class ConnectionsViewModelState(
-    val selectedStopFrom: Stop? = null,
-    val selectedTimeFrom: LocalTime = LocalTime.now(),
-    val selectedStopTo: Stop? = null,
-    val selectedTimeTo: LocalTime = LocalTime.now(),
+    val selectedFromStop: Stop? = null,
+    val selectedToStop: Stop? = null,
+    val selectedTime: LocalTime = LocalTime.now(),
     val stops: List<Stop> = emptyList(),
     val connections: List<Connection> = emptyList(),
     val isFormLoading: Boolean = false,
@@ -75,7 +75,7 @@ private data class ConnectionsViewModelState(
 
     fun toUiState(): ConnectionsUiState =
         if (!showResults) {
-            if(isFormLoading || stops.isEmpty()) {
+            if (isFormLoading || stops.isEmpty()) {
                 ConnectionsUiState.Form.NoData(
                     isResultsOpen = showResults,
                     isLoading = isFormLoading,
@@ -83,12 +83,9 @@ private data class ConnectionsViewModelState(
                 )
             } else {
                 ConnectionsUiState.Form.HasData(
-                    formData = ConnectionsFormData(
-                        selectedStopFrom = selectedStopFrom ?: stops[0],
-                        selectedTimeFrom = selectedTimeFrom,
-                        selectedStopTo = selectedStopTo ?: stops[0],
-                        selectedTimeTo = selectedTimeTo,
-                    ),
+                    selectedFromStop = selectedFromStop ?: stops.first(),
+                    selectedToStop = selectedToStop ?: stops.first(),
+                    selectedTime = selectedTime,
                     stops = stops,
                     isResultsOpen = showResults,
                     isLoading = isFormLoading,
@@ -96,7 +93,7 @@ private data class ConnectionsViewModelState(
                 )
             }
         } else {
-            if(isResultsLoading) {
+            if (isResultsLoading) {
                 ConnectionsUiState.Results.NoResults(
                     isResultsOpen = showResults,
                     isLoading = isFormLoading,
@@ -114,7 +111,7 @@ private data class ConnectionsViewModelState(
 }
 
 class ConnectionsViewModel(
-    private val apolloClient: ApolloClient
+    private val apolloClient: ApolloClient,
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(ConnectionsViewModelState())
@@ -167,14 +164,17 @@ class ConnectionsViewModel(
         }
     }
 
-    fun submitForm(formData: ConnectionsFormData, date: LocalDate = LocalDate.now()) {
+    fun submitForm() {
         viewModelState.update { it.copy(showResults = true, isResultsLoading = true) }
 
         viewModelScope.launch {
             val result = Result.Success(listOf<Connection>()) as Result<List<Connection>>
             viewModelState.update {
                 when (result) {
-                    is Result.Success -> it.copy(connections = result.data, isResultsLoading = false)
+                    is Result.Success -> it.copy(
+                        connections = result.data,
+                        isResultsLoading = false
+                    )
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -195,18 +195,21 @@ class ConnectionsViewModel(
         viewModelState.update { it.copy(showResults = false) }
     }
 
-    fun updateForm(formData: ConnectionsFormData) {
-        viewModelState.update { it.copy(
-            selectedStopFrom = formData.selectedStopFrom,
-            selectedTimeFrom = formData.selectedTimeFrom,
-            selectedStopTo = formData.selectedStopTo,
-            selectedTimeTo = formData.selectedTimeTo,
-        ) }
+    fun updateFromStop(stop: Stop) {
+        viewModelState.update { it.copy(selectedFromStop = stop) }
+    }
+
+    fun updateToStop(stop: Stop) {
+        viewModelState.update { it.copy(selectedToStop = stop) }
+    }
+
+    fun updateTime(time: LocalTime) {
+        viewModelState.update { it.copy(selectedTime = time) }
     }
 
     companion object {
         fun provideFactory(
-            apolloClient: ApolloClient
+            apolloClient: ApolloClient,
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {

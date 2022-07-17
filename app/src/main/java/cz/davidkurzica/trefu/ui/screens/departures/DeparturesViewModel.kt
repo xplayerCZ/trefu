@@ -14,7 +14,6 @@ import cz.davidkurzica.trefu.util.ErrorMessage
 import cz.davidkurzica.trefu.util.toStop
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 import java.time.LocalTime
 import java.util.*
 
@@ -32,13 +31,13 @@ sealed interface DeparturesUiState {
             val stops: List<Stop>,
             override val isResultsOpen: Boolean,
             override val isLoading: Boolean,
-            override val errorMessages: List<ErrorMessage>
+            override val errorMessages: List<ErrorMessage>,
         ) : Form
 
         data class NoData(
             override val isResultsOpen: Boolean,
             override val isLoading: Boolean,
-            override val errorMessages: List<ErrorMessage>
+            override val errorMessages: List<ErrorMessage>,
         ) : Form
     }
 
@@ -52,6 +51,7 @@ sealed interface DeparturesUiState {
             override val isLoading: Boolean,
             override val errorMessages: List<ErrorMessage>,
         ) : Results
+
         data class NoResults(
             override val isResultsOpen: Boolean,
             override val isLoading: Boolean,
@@ -73,7 +73,7 @@ private data class DeparturesViewModelState(
 
     fun toUiState(): DeparturesUiState =
         if (!showResults) {
-            if(isFormLoading || stops.isEmpty()) {
+            if (isFormLoading || stops.isEmpty()) {
                 DeparturesUiState.Form.NoData(
                     isResultsOpen = showResults,
                     isLoading = isFormLoading,
@@ -90,7 +90,7 @@ private data class DeparturesViewModelState(
                 )
             }
         } else {
-            if(isResultsLoading) {
+            if (isResultsLoading) {
                 DeparturesUiState.Results.NoResults(
                     isResultsOpen = showResults,
                     isLoading = isFormLoading,
@@ -108,7 +108,7 @@ private data class DeparturesViewModelState(
 }
 
 class DeparturesViewModel(
-    private val apolloClient: ApolloClient
+    private val apolloClient: ApolloClient,
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(DeparturesViewModelState())
@@ -161,7 +161,7 @@ class DeparturesViewModel(
         }
     }
 
-    fun submitForm(stopId: Int, time: LocalTime = LocalTime.now(), date: LocalDate = LocalDate.now()) {
+    fun submitForm() {
         viewModelState.update { it.copy(showResults = true, isResultsLoading = true) }
 
         viewModelScope.launch {
@@ -193,7 +193,7 @@ class DeparturesViewModel(
         viewModelState.update { it.copy(showResults = false) }
     }
 
-    fun updateTrack(stop: Stop) {
+    fun updateStop(stop: Stop) {
         viewModelState.update { it.copy(selectedStop = stop) }
     }
 
@@ -203,7 +203,7 @@ class DeparturesViewModel(
 
     companion object {
         fun provideFactory(
-            apolloClient: ApolloClient
+            apolloClient: ApolloClient,
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {

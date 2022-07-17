@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.ui.components.departures
+package cz.davidkurzica.trefu.ui.components.form
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,31 +11,31 @@ import androidx.compose.ui.unit.dp
 import cz.davidkurzica.trefu.model.Stop
 import cz.davidkurzica.trefu.ui.components.TimeSelector
 import cz.davidkurzica.trefu.ui.components.selector.FocusableStopSelector
+import cz.davidkurzica.trefu.ui.screens.departures.DeparturesFocusState
 import java.time.LocalTime
 
 @Composable
 fun DeparturesForm(
     modifier: Modifier = Modifier,
-    options: List<Stop>,
     selectedStop: Stop,
-    onSelectedTrackChange: (Stop) -> Unit,
     selectedTime: LocalTime,
-    onSelectedTimeChange: (LocalTime) -> Unit
+    onTimeChange: (LocalTime) -> Unit,
+    onFocusChange: (DeparturesFocusState) -> Unit,
 ) {
     Box(
         modifier = modifier
             .padding(top = 12.dp)
             .fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.TopCenter,
     ) {
         Column {
             FocusableStopSelector(
                 selectedStop = selectedStop,
-                onClick = { },
+                onClick = { onFocusChange(DeparturesFocusState.Stop) },
             )
             TimeSelector(
                 time = selectedTime,
-                onTimeSelected = onSelectedTimeChange
+                onTimeSelected = onTimeChange
             )
         }
     }

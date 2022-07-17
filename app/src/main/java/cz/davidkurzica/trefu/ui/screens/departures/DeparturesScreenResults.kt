@@ -13,7 +13,7 @@ import cz.davidkurzica.trefu.ui.components.FullScreenLoading
 import cz.davidkurzica.trefu.ui.components.LoadingContent
 import cz.davidkurzica.trefu.ui.components.TrefuReturnTopAppBar
 import cz.davidkurzica.trefu.ui.components.TrefuSnackbarHost
-import cz.davidkurzica.trefu.ui.components.departures.DeparturesList
+import cz.davidkurzica.trefu.ui.components.list.DeparturesList
 
 
 @Composable
@@ -22,7 +22,7 @@ fun ResultsScreen(
     closeResults: () -> Unit,
     onErrorDismiss: (Long) -> Unit,
     scaffoldState: ScaffoldState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     DeparturesScreenWithList(
         uiState = uiState,
@@ -48,8 +48,8 @@ private fun DeparturesScreenWithList(
     modifier: Modifier = Modifier,
     hasDeparturesContent: @Composable (
         uiState: DeparturesUiState.Results.HasResults,
-        modifier: Modifier
-    ) -> Unit
+        modifier: Modifier,
+    ) -> Unit,
 ) {
     val title = stringResource(id = R.string.departures_title)
     Scaffold(

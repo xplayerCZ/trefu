@@ -1,5 +1,6 @@
 package cz.davidkurzica.trefu.ui.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -47,11 +48,18 @@ fun <T> FullScreenSelection(
                 FullScreenSelectionRow(
                     selected = it == selectedOption,
                     item = it,
-                    onSelect = onSelectedChange,
+                    onSelect = { selected ->
+                        onSelectedChange(selected)
+                        onCloseSelection()
+                    },
                     text = displayValue(it),
                 )
             }
         }
+    }
+
+    BackHandler {
+        onCloseSelection()
     }
 }
 
@@ -65,10 +73,11 @@ fun <T> FullScreenSelectionRow(
     Text(
         text = text,
         modifier = Modifier
-            .padding(12.dp)
-            .fillMaxWidth()
             .selectable(
                 selected = selected,
                 onClick = { onSelect(item) }
-            ))
+            )
+            .padding(12.dp)
+            .fillMaxWidth()
+    )
 }

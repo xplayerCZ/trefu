@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 fun LoadingContent(
     empty: Boolean,
     emptyContent: @Composable () -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     if (empty) {
         emptyContent()

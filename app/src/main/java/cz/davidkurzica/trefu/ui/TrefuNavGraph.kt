@@ -22,7 +22,7 @@ fun TrefuNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     openDrawer: () -> Unit = {},
-    startDestination: String = TrefuDestinations.HOME_ROUTE
+    startDestination: String = TrefuDestinations.HOME_ROUTE,
 ) {
     NavHost(
         navController = navController,

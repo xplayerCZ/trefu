@@ -118,7 +118,11 @@ fun TimePickerDialog(time: LocalTime, onTimeChanged: (LocalTime) -> Unit) {
 fun TimePickerPreview() {
     TrefuTheme {
         Surface {
-            TrefuTimePickerDialog(onTimeSelected = { }, onDismissRequest = {}, time = LocalTime.of(12, 24))
+            TrefuTimePickerDialog(
+                onTimeSelected = { },
+                onDismissRequest = {},
+                time = LocalTime.of(12, 24)
+            )
         }
     }
 }

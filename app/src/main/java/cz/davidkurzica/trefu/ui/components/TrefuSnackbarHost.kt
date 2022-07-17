@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 fun TrefuSnackbarHost(
     hostState: SnackbarHostState,
     modifier: Modifier = Modifier,
-    snackbar: @Composable (SnackbarData) -> Unit = { Snackbar(it) }
+    snackbar: @Composable (SnackbarData) -> Unit = { Snackbar(it) },
 ) {
     SnackbarHost(
         hostState = hostState,

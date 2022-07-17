@@ -13,7 +13,7 @@ import cz.davidkurzica.trefu.ui.components.FullScreenLoading
 import cz.davidkurzica.trefu.ui.components.LoadingContent
 import cz.davidkurzica.trefu.ui.components.TrefuReturnTopAppBar
 import cz.davidkurzica.trefu.ui.components.TrefuSnackbarHost
-import cz.davidkurzica.trefu.ui.components.connections.ConnectionsList
+import cz.davidkurzica.trefu.ui.components.list.ConnectionsList
 
 @Composable
 fun ResultsScreen(
@@ -21,7 +21,7 @@ fun ResultsScreen(
     closeResults: () -> Unit,
     onErrorDismiss: (Long) -> Unit,
     scaffoldState: ScaffoldState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     ConnectionsScreenWithList(
         uiState = uiState,
@@ -47,8 +47,8 @@ private fun ConnectionsScreenWithList(
     modifier: Modifier = Modifier,
     hasConnectionsContent: @Composable (
         uiState: ConnectionsUiState.Results.HasResults,
-        modifier: Modifier
-    ) -> Unit
+        modifier: Modifier,
+    ) -> Unit,
 ) {
     val title = stringResource(id = R.string.connections_title)
     Scaffold(

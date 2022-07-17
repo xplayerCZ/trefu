@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.ui.components.connections
+package cz.davidkurzica.trefu.ui.components.list
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun ConnectionsList(
     modifier: Modifier = Modifier,
-    connections: List<Connection>
+    connections: List<Connection>,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -35,7 +35,7 @@ fun ConnectionsList(
 
 @Composable
 fun ConnectionItem(
-    connection: Connection
+    connection: Connection,
 ) {
     Card(
         elevation = 4.dp
@@ -54,7 +54,7 @@ fun ConnectionItem(
 fun ConnectionSubItem(
     to: DepartureSimple,
     from: DepartureSimple,
-    lineShortCode: String
+    lineShortCode: String,
 ) {
 
     Column(

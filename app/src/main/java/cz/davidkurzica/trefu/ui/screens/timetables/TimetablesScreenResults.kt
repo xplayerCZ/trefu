@@ -13,7 +13,7 @@ import cz.davidkurzica.trefu.ui.components.FullScreenLoading
 import cz.davidkurzica.trefu.ui.components.LoadingContent
 import cz.davidkurzica.trefu.ui.components.TrefuReturnTopAppBar
 import cz.davidkurzica.trefu.ui.components.TrefuSnackbarHost
-import cz.davidkurzica.trefu.ui.components.timetables.TimetablesList
+import cz.davidkurzica.trefu.ui.components.list.TimetablesList
 
 @Composable
 fun ResultsScreen(
@@ -21,7 +21,7 @@ fun ResultsScreen(
     closeResults: () -> Unit,
     onErrorDismiss: (Long) -> Unit,
     scaffoldState: ScaffoldState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     TimetablesScreenWithList(
         uiState = uiState,
@@ -47,8 +47,8 @@ private fun TimetablesScreenWithList(
     modifier: Modifier = Modifier,
     hasTimetablesContent: @Composable (
         uiState: TimetablesUiState.Results.HasResults,
-        modifier: Modifier
-    ) -> Unit
+        modifier: Modifier,
+    ) -> Unit,
 ) {
     val title = stringResource(id = R.string.timetables_title)
     Scaffold(

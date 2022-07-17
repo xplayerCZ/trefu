@@ -13,16 +13,16 @@ import java.time.LocalTime
 fun DeparturesRoute(
     departuresViewModel: DeparturesViewModel,
     openDrawer: () -> Unit,
-    scaffoldState: ScaffoldState = rememberScaffoldState()
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
 ) {
     val uiState by departuresViewModel.uiState.collectAsState()
 
     DeparturesRoute(
         uiState = uiState,
-        onFormSubmit = { stopId, time -> departuresViewModel.submitForm(stopId, time) },
-        onSelectedTrackUpdate = { departuresViewModel.updateTrack(it) },
-        onSelectedTimeUpdate = { departuresViewModel.updateTime(it) },
+        onFormSubmit = { departuresViewModel.submitForm() },
         onFormClean = { departuresViewModel.cleanForm() },
+        onStopChange = { departuresViewModel.updateStop(it) },
+        onTimeChange = { departuresViewModel.updateTime(it) },
         onErrorDismiss = { departuresViewModel.errorShown(it) },
         closeResults = { departuresViewModel.closeResults() },
         openDrawer = openDrawer,
@@ -33,14 +33,14 @@ fun DeparturesRoute(
 @Composable
 fun DeparturesRoute(
     uiState: DeparturesUiState,
-    onFormSubmit: (Int, LocalTime) -> Unit,
+    onFormSubmit: () -> Unit,
     onFormClean: () -> Unit,
-    onSelectedTrackUpdate: (Stop) -> Unit,
-    onSelectedTimeUpdate: (LocalTime) -> Unit,
+    onStopChange: (Stop) -> Unit,
+    onTimeChange: (LocalTime) -> Unit,
     onErrorDismiss: (Long) -> Unit,
     closeResults: () -> Unit,
     openDrawer: () -> Unit,
-    scaffoldState: ScaffoldState
+    scaffoldState: ScaffoldState,
 ) {
     when (getDeparturesScreenType(uiState)) {
         DeparturesScreenType.Form -> {
@@ -48,8 +48,8 @@ fun DeparturesRoute(
                 uiState = uiState as DeparturesUiState.Form,
                 onFormSubmit = onFormSubmit,
                 onFormClean = onFormClean,
-                onSelectedTimeUpdate = onSelectedTimeUpdate,
-                onSelectedTrackUpdate = onSelectedTrackUpdate,
+                onStopChange = onStopChange,
+                onTimeChange = onTimeChange,
                 openDrawer = openDrawer,
                 scaffoldState = scaffoldState,
                 onErrorDismiss = onErrorDismiss
@@ -77,7 +77,7 @@ private enum class DeparturesScreenType {
 
 @Composable
 private fun getDeparturesScreenType(
-    uiState: DeparturesUiState
+    uiState: DeparturesUiState,
 ): DeparturesScreenType = when (uiState.isResultsOpen) {
     false -> DeparturesScreenType.Form
     true -> DeparturesScreenType.Results

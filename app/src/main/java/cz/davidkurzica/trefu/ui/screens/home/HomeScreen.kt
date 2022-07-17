@@ -19,7 +19,7 @@ import cz.davidkurzica.trefu.ui.theme.TrefuTheme
 @Composable
 fun HomeScreen(
     openDrawer: () -> Unit,
-    scaffoldState: ScaffoldState
+    scaffoldState: ScaffoldState,
 ) {
     val title = stringResource(id = R.string.home_title)
     Scaffold(
@@ -48,7 +48,7 @@ fun HomeScreen(
 
 @Composable
 fun HomeScreenContent(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Surface(modifier, color = Color.White) {
         Box(

@@ -6,10 +6,11 @@ import com.apollographql.apollo3.api.json.JsonReader
 import com.apollographql.apollo3.api.json.JsonWriter
 import java.time.LocalTime
 
+@Suppress("unused")
 object LocalTimeAdapter : Adapter<LocalTime> {
     override fun fromJson(
         reader: JsonReader,
-        customScalarAdapters: CustomScalarAdapters
+        customScalarAdapters: CustomScalarAdapters,
     ): LocalTime {
         return LocalTime.parse(reader.nextString()!!)
     }
@@ -17,7 +18,7 @@ object LocalTimeAdapter : Adapter<LocalTime> {
     override fun toJson(
         writer: JsonWriter,
         customScalarAdapters: CustomScalarAdapters,
-        value: LocalTime
+        value: LocalTime,
     ) {
         writer.value(value.toString())
     }
