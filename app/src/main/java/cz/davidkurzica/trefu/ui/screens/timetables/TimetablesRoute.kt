@@ -24,7 +24,7 @@ fun TimetablesRoute(
         onLineChange = { timetablesViewModel.updateLine(it) },
         onStopChange = { timetablesViewModel.updateStop(it) },
         onDirectionChange = { timetablesViewModel.updateDirection(it) },
-        onFormClean = { timetablesViewModel.cleanForm() },
+        onFormRefresh = { timetablesViewModel.refreshForm() },
         onErrorDismiss = { timetablesViewModel.errorShown(it) },
         closeResults = { timetablesViewModel.closeResults() },
         openDrawer = openDrawer,
@@ -36,7 +36,7 @@ fun TimetablesRoute(
 fun TimetablesRoute(
     uiState: TimetablesUiState,
     onFormSubmit: () -> Unit,
-    onFormClean: () -> Unit,
+    onFormRefresh: () -> Unit,
     onLineChange: (Line) -> Unit,
     onStopChange: (Stop) -> Unit,
     onDirectionChange: (Direction) -> Unit,
@@ -50,7 +50,7 @@ fun TimetablesRoute(
             FormScreen(
                 uiState = uiState as TimetablesUiState.Form,
                 onFormSubmit = onFormSubmit,
-                onFormClean = onFormClean,
+                onFormRefresh = onFormRefresh,
                 onLineChange = onLineChange,
                 onStopChange = onStopChange,
                 onDirectionChange = onDirectionChange,

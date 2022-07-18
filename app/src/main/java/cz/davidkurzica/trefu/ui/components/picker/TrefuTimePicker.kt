@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.ui.components
+package cz.davidkurzica.trefu.ui.components.picker
 
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text

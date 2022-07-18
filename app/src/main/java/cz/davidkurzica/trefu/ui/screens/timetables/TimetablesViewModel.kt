@@ -230,8 +230,8 @@ class TimetablesViewModel(
         }
     }
 
-    fun cleanForm() {
-        TODO("Not yet implemented")
+    fun refreshForm() {
+        viewModelScope.launchWithLoading { updateStops() }
     }
 
     fun closeResults() {

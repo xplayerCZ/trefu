@@ -187,8 +187,8 @@ class ConnectionsViewModel(
         }
     }
 
-    fun cleanForm() {
-        TODO("Not yet implemented")
+    fun refreshForm() {
+        loadForm()
     }
 
     fun closeResults() {

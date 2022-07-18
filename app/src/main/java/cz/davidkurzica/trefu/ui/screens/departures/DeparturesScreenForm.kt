@@ -1,7 +1,5 @@
 package cz.davidkurzica.trefu.ui.screens.departures
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -11,10 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.model.Stop
+import cz.davidkurzica.trefu.ui.components.ErrorPage
 import cz.davidkurzica.trefu.ui.components.FullScreenLoading
 import cz.davidkurzica.trefu.ui.components.FullScreenSelection
 import cz.davidkurzica.trefu.ui.components.LoadingContent
-import cz.davidkurzica.trefu.ui.components.TrefuDefaultTopAppBar
+import cz.davidkurzica.trefu.ui.components.appbar.TrefuDefaultTopAppBar
 import cz.davidkurzica.trefu.ui.components.form.DeparturesForm
 import java.time.LocalTime
 
@@ -27,7 +26,7 @@ enum class DeparturesFocusState {
 fun FormScreen(
     uiState: DeparturesUiState.Form,
     onFormSubmit: () -> Unit,
-    onFormClean: () -> Unit,
+    onFormRefresh: () -> Unit,
     onStopChange: (Stop) -> Unit,
     onTimeChange: (LocalTime) -> Unit,
     onErrorDismiss: (Long) -> Unit,
@@ -41,6 +40,7 @@ fun FormScreen(
         openDrawer = openDrawer,
         scaffoldState = scaffoldState,
         onFormSubmit = onFormSubmit,
+        onFormRefresh = onFormRefresh,
         modifier = modifier
     ) { hasDataUiState, contentModifier ->
 
@@ -78,6 +78,7 @@ private fun DeparturesScreenWithForm(
     uiState: DeparturesUiState.Form,
     onErrorDismiss: (Long) -> Unit,
     onFormSubmit: () -> Unit,
+    onFormRefresh: () -> Unit,
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
@@ -99,13 +100,22 @@ private fun DeparturesScreenWithForm(
                 uiState = uiState,
             )
         },
+        loading = uiState.isLoading,
+        onRefresh = { onFormRefresh() },
         content = {
             when (uiState) {
                 is DeparturesUiState.Form.HasData -> hasDataContent(
                     uiState,
                     modifier
                 )
-                is DeparturesUiState.Form.NoData -> Box(modifier.fillMaxSize()) { /* empty screen */ }
+                is DeparturesUiState.Form.NoData -> DeparturesTopAppBarScreen(
+                    scaffoldState = scaffoldState,
+                    openDrawer = openDrawer,
+                    onFormSubmit = onFormSubmit,
+                    uiState = uiState
+                ) {
+                    ErrorPage(onErrorDismiss = onErrorDismiss)
+                }
             }
         }
     )

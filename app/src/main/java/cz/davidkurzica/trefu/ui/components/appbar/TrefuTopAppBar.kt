@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.ui.components
+package cz.davidkurzica.trefu.ui.components.appbar
 
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton

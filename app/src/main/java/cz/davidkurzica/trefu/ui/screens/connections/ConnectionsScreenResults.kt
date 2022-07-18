@@ -11,8 +11,8 @@ import androidx.compose.ui.res.stringResource
 import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.ui.components.FullScreenLoading
 import cz.davidkurzica.trefu.ui.components.LoadingContent
-import cz.davidkurzica.trefu.ui.components.TrefuReturnTopAppBar
 import cz.davidkurzica.trefu.ui.components.TrefuSnackbarHost
+import cz.davidkurzica.trefu.ui.components.appbar.TrefuReturnTopAppBar
 import cz.davidkurzica.trefu.ui.components.list.ConnectionsList
 
 @Composable
@@ -71,6 +71,8 @@ private fun ConnectionsScreenWithList(
                 is ConnectionsUiState.Results.NoResults -> uiState.isLoading
             },
             emptyContent = { FullScreenLoading() },
+            loading = uiState.isLoading,
+            onRefresh = { },
             content = {
                 when (uiState) {
                     is ConnectionsUiState.Results.HasResults -> hasConnectionsContent(

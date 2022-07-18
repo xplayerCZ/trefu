@@ -1,7 +1,5 @@
 package cz.davidkurzica.trefu.ui.screens.connections
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -11,10 +9,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.model.Stop
+import cz.davidkurzica.trefu.ui.components.ErrorPage
 import cz.davidkurzica.trefu.ui.components.FullScreenLoading
 import cz.davidkurzica.trefu.ui.components.FullScreenSelection
 import cz.davidkurzica.trefu.ui.components.LoadingContent
-import cz.davidkurzica.trefu.ui.components.TrefuDefaultTopAppBar
+import cz.davidkurzica.trefu.ui.components.appbar.TrefuDefaultTopAppBar
 import cz.davidkurzica.trefu.ui.components.form.ConnectionsForm
 import java.time.LocalTime
 
@@ -28,7 +27,7 @@ enum class ConnectionsFocusState {
 fun FormScreen(
     uiState: ConnectionsUiState.Form,
     onFormSubmit: () -> Unit,
-    onFormClean: () -> Unit,
+    onFormRefresh: () -> Unit,
     onStopFromChange: (Stop) -> Unit,
     onStopToChange: (Stop) -> Unit,
     onTimeChange: (LocalTime) -> Unit,
@@ -43,6 +42,7 @@ fun FormScreen(
         openDrawer = openDrawer,
         scaffoldState = scaffoldState,
         onFormSubmit = onFormSubmit,
+        onFormRefresh = onFormRefresh,
         modifier = modifier
     ) { hasDataUiState, contentModifier ->
 
@@ -89,6 +89,7 @@ private fun ConnectionsScreenWithForm(
     uiState: ConnectionsUiState.Form,
     onErrorDismiss: (Long) -> Unit,
     onFormSubmit: () -> Unit,
+    onFormRefresh: () -> Unit,
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState,
     modifier: Modifier = Modifier,
@@ -110,11 +111,18 @@ private fun ConnectionsScreenWithForm(
                 openDrawer = openDrawer,
             )
         },
+        loading = uiState.isLoading,
+        onRefresh = { onFormRefresh() },
         content = {
             when (uiState) {
                 is ConnectionsUiState.Form.HasData -> hasDataContent(uiState, modifier)
-                is ConnectionsUiState.Form.NoData -> {
-                    Box(modifier.fillMaxSize()) { /* empty screen */ }
+                is ConnectionsUiState.Form.NoData -> ConnectionsTopAppBarScreen(
+                    scaffoldState = scaffoldState,
+                    openDrawer = openDrawer,
+                    onFormSubmit = onFormSubmit,
+                    uiState = uiState
+                ) {
+                    ErrorPage(onErrorDismiss = onErrorDismiss)
                 }
             }
         }

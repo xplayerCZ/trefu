@@ -20,7 +20,7 @@ fun DeparturesRoute(
     DeparturesRoute(
         uiState = uiState,
         onFormSubmit = { departuresViewModel.submitForm() },
-        onFormClean = { departuresViewModel.cleanForm() },
+        onFormRefresh = { departuresViewModel.refreshForm() },
         onStopChange = { departuresViewModel.updateStop(it) },
         onTimeChange = { departuresViewModel.updateTime(it) },
         onErrorDismiss = { departuresViewModel.errorShown(it) },
@@ -34,7 +34,7 @@ fun DeparturesRoute(
 fun DeparturesRoute(
     uiState: DeparturesUiState,
     onFormSubmit: () -> Unit,
-    onFormClean: () -> Unit,
+    onFormRefresh: () -> Unit,
     onStopChange: (Stop) -> Unit,
     onTimeChange: (LocalTime) -> Unit,
     onErrorDismiss: (Long) -> Unit,
@@ -47,7 +47,7 @@ fun DeparturesRoute(
             FormScreen(
                 uiState = uiState as DeparturesUiState.Form,
                 onFormSubmit = onFormSubmit,
-                onFormClean = onFormClean,
+                onFormRefresh = onFormRefresh,
                 onStopChange = onStopChange,
                 onTimeChange = onTimeChange,
                 openDrawer = openDrawer,

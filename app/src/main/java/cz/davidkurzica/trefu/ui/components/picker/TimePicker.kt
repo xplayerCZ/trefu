@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.ui.components
+package cz.davidkurzica.trefu.ui.components.picker
 
 import android.widget.TimePicker
 import androidx.compose.foundation.background

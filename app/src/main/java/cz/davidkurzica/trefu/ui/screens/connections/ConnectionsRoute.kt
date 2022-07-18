@@ -20,7 +20,7 @@ fun ConnectionsRoute(
     ConnectionsRoute(
         uiState = uiState,
         onFormSubmit = { connectionsViewModel.submitForm() },
-        onFormClean = { connectionsViewModel.cleanForm() },
+        onFormRefresh = { connectionsViewModel.refreshForm() },
         onStopFromChange = { connectionsViewModel.updateFromStop(it) },
         onStopToChange = { connectionsViewModel.updateToStop(it) },
         onTimeChange = { connectionsViewModel.updateTime(it) },
@@ -35,7 +35,7 @@ fun ConnectionsRoute(
 fun ConnectionsRoute(
     uiState: ConnectionsUiState,
     onFormSubmit: () -> Unit,
-    onFormClean: () -> Unit,
+    onFormRefresh: () -> Unit,
     onStopFromChange: (Stop) -> Unit,
     onStopToChange: (Stop) -> Unit,
     onTimeChange: (LocalTime) -> Unit,
@@ -49,7 +49,7 @@ fun ConnectionsRoute(
             FormScreen(
                 uiState = uiState as ConnectionsUiState.Form,
                 onFormSubmit = onFormSubmit,
-                onFormClean = onFormClean,
+                onFormRefresh = onFormRefresh,
                 onStopFromChange = onStopFromChange,
                 onStopToChange = onStopToChange,
                 onTimeChange = onTimeChange,

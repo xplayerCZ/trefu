@@ -9,7 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cz.davidkurzica.trefu.model.Stop
-import cz.davidkurzica.trefu.ui.components.TimeSelector
+import cz.davidkurzica.trefu.ui.components.picker.TimeSelector
 import cz.davidkurzica.trefu.ui.components.selector.FocusableStopSelector
 import cz.davidkurzica.trefu.ui.screens.departures.DeparturesFocusState
 import java.time.LocalTime
