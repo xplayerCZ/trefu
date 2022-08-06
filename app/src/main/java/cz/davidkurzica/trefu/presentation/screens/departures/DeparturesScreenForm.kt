@@ -65,9 +65,10 @@ fun FormScreen(
                 scaffoldState = scaffoldState,
                 options = hasDataUiState.stops,
                 selectedOption = hasDataUiState.selectedStop,
-                displayValue = { it.name },
                 onCloseSelection = { focus = DeparturesFocusState.None },
                 onSelectedChange = onStopChange,
+                filterBy = { it.name },
+                displayValue = { it.name },
             )
         }
     }

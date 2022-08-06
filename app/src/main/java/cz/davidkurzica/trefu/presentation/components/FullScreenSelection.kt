@@ -6,46 +6,44 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
+import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import cz.davidkurzica.trefu.presentation.components.appbar.SearchAppBar
 
 @Composable
 fun <T> FullScreenSelection(
     options: List<T>,
+    filterBy: (T) -> String,
     onSelectedChange: (T) -> Unit,
     selectedOption: T,
     scaffoldState: ScaffoldState,
     onCloseSelection: () -> Unit,
     displayValue: (T) -> String,
 ) {
+    var filter by remember { mutableStateOf("") }
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text("Select stop")
-                },
-                navigationIcon = {
-                    IconButton(onClick = onCloseSelection) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Close Selection",
-                        )
-                    }
-                },
-                elevation = 0.dp
+            SearchAppBar(
+                text = filter,
+                onTextChange = { filter = it },
+                onCloseClicked = onCloseSelection,
+                onSearchClicked = {},
             )
         }
     ) { padding ->
         LazyColumn(
             modifier = Modifier.padding(padding)
         ) {
-            items(options) {
-                FullScreenSelectionRow(
+            items(
+                options.filter { filterBy(it).lowercase().startsWith(filter.lowercase()) }
+            ) {
+                FullScreenSelectionItem(
                     selected = it == selectedOption,
                     item = it,
                     onSelect = { selected ->
@@ -64,7 +62,7 @@ fun <T> FullScreenSelection(
 }
 
 @Composable
-fun <T> FullScreenSelectionRow(
+fun <T> FullScreenSelectionItem(
     selected: Boolean,
     item: T,
     onSelect: (T) -> Unit,

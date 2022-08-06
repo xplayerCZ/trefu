@@ -70,6 +70,7 @@ fun FormScreen(
                 selectedOption = hasDataUiState.selectedFromStop,
                 scaffoldState = scaffoldState,
                 onCloseSelection = { focus = ConnectionsFocusState.None },
+                filterBy = { it.name },
                 displayValue = { it.name },
             )
             ConnectionsFocusState.StopTo -> FullScreenSelection(
@@ -78,6 +79,7 @@ fun FormScreen(
                 selectedOption = hasDataUiState.selectedToStop,
                 scaffoldState = scaffoldState,
                 onCloseSelection = { focus = ConnectionsFocusState.None },
+                filterBy = { it.name },
                 displayValue = { it.name },
             )
         }

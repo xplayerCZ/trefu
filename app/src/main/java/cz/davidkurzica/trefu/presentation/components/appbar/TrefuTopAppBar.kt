@@ -8,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.dp
 
 @Composable
 fun TrefuDefaultTopAppBar(
@@ -28,7 +27,6 @@ fun TrefuDefaultTopAppBar(
                 )
             }
         },
-        elevation = 0.dp
     )
 }
 
@@ -50,6 +48,5 @@ fun TrefuReturnTopAppBar(
                 )
             }
         },
-        elevation = 0.dp
     )
 }

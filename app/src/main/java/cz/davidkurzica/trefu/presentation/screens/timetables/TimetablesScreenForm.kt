@@ -72,6 +72,7 @@ fun FormScreen(
                 selectedOption = hasDataUiState.selectedStop,
                 scaffoldState = scaffoldState,
                 onCloseSelection = { focus = TimetablesFocusState.None },
+                filterBy = { it.name },
                 displayValue = { it.name },
             )
             TimetablesFocusState.Line -> FullScreenSelection(
@@ -80,6 +81,7 @@ fun FormScreen(
                 selectedOption = hasDataUiState.selectedLine,
                 scaffoldState = scaffoldState,
                 onCloseSelection = { focus = TimetablesFocusState.None },
+                filterBy = { it.shortCode },
                 displayValue = { it.shortCode },
             )
         }
