@@ -1,43 +1,28 @@
 package cz.davidkurzica.trefu
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.apollographql.apollo3.ApolloClient
-import com.apollographql.apollo3.network.http.LoggingInterceptor
-import com.apollographql.apollo3.network.okHttpClient
-import cz.davidkurzica.trefu.ui.TrefuApp
-import okhttp3.OkHttpClient
-import java.util.concurrent.TimeUnit
+import cz.davidkurzica.trefu.di.appModule
+import cz.davidkurzica.trefu.di.repositoryModule
+import cz.davidkurzica.trefu.presentation.TrefuApp
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
 
 class MainActivity : ComponentActivity() {
-    lateinit var apolloClient: ApolloClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val connectTimeout = 10000L
-        val readTimeout = 10000L
-
-        val okHttpClient = OkHttpClient.Builder()
-            .connectTimeout(connectTimeout, TimeUnit.MILLISECONDS)
-            .readTimeout(readTimeout, TimeUnit.MILLISECONDS)
-            .build()
-
-        apolloClient = ApolloClient.Builder()
-            .serverUrl("http://192.168.1.21:4000/graphql")
-            .addHttpInterceptor(LoggingInterceptor(LoggingInterceptor.Level.BODY) {
-                Log.i(
-                    "ApolloClient",
-                    it
-                )
-            })
-            .okHttpClient(okHttpClient)
-            .build()
+        startKoin {
+            androidLogger()
+            androidContext(this@MainActivity)
+            modules(appModule, repositoryModule)
+        }
 
         setContent {
-            TrefuApp(apolloClient)
+            TrefuApp()
         }
     }
 }
