@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.plugin.serialization'
     id 'com.apollographql.apollo3'
+    id 'com.squareup.sqldelight'
 }
 
 android {
@@ -83,6 +84,10 @@ dependencies {
     implementation "androidx.window:window:1.1.0-alpha02"
 
     implementation "com.apollographql.apollo3:apollo-runtime:3.3.2"
+
+    implementation 'com.squareup.sqldelight:gradle-plugin:1.5.3'
+    implementation "com.squareup.sqldelight:android-driver:1.5.3"
+
     implementation "io.insert-koin:koin-android:$koin_version"
     implementation("io.insert-koin:koin-androidx-compose:$koin_version")
 
@@ -106,6 +111,15 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
 
 apollo {
     packageName.set("cz.davidkurzica.trefu.data.remote")
-    mapScalar("Date", "java.util.LocalDate", "cz.davidkurzica.trefu.adapter.LocalDateAdapter")
-    mapScalar("Time", "java.util.LocalTime", "cz.davidkurzica.trefu.adapter.LocalTimeAdapter")
+    mapScalar("Date", "java.util.LocalDate", "cz.davidkurzica.trefu.data.adapter.LocalDateAdapter")
+    mapScalar("Time", "java.util.LocalTime", "cz.davidkurzica.trefu.data.adapter.LocalTimeAdapter")
+}
+
+sqldelight {
+    TrefuDatabase {
+        packageName = "cz.davidkurzica.trefu.db"
+        sourceFolders = ["sqldelight/cz/davidkurzica/trefu"]
+        schemaOutputDirectory = file("src/main/sqldelight/databases")
+        verifyMigrations = true
+    }
 }
