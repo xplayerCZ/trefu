@@ -1,0 +1,17 @@
+query DeparturesResult($filter: DepartureFilters) {
+    departures(filter: $filter) {
+        connection {
+            route {
+                line {
+                    shortCode
+                }
+                lastRouteStop {
+                    stop {
+                        name
+                    }
+                }
+            }
+        }
+        time
+    }
+}

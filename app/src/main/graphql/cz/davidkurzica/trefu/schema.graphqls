@@ -1,215 +1,141 @@
 type Query {
     stops(filter: StopFilters): [Stop!]!
-
     stop(id: ID!): Stop!
-
     routes(filter: RouteFilters): [Route!]!
-
     route(id: ID!): Route!
-
     packets(filter: PacketFilters): [Packet!]!
-
     packet(id: ID!): Packet!
-
     lines(filter: LineFilters): [Line!]!
-
     line(id: ID!): Line!
-
     connections(filter: ConnectionFilters): [Connection!]!
-
     connection(id: ID!): Connection!
-
     departures(filter: DepartureFilters): [Departure!]!
-
     departure(id: ID!): Departure!
-
     rules(filter: RuleFilters): [Rule!]!
-
     rule(id: ID!): Rule!
 }
 
 scalar Date
-
 scalar Time
 
 input StopFilters {
     offset: Int
-
     limit: Int
-
-    packetId: Int
+    forDate: Date
 }
 
 type Stop {
     id: ID!
-
     name: String!
-
     latitude: String!
-
     longitude: String!
-
     code: Int!
-
-    enabled: Boolean!
-
     routeStops: [RouteStop!]!
 }
 
 input RouteFilters {
     offset: Int
-
     limit: Int
-
     lineId: Int
-
     direction: Int
-
-    packetId: Int
+    forDate: Date
 }
 
 type Route {
     id: ID!
-
     length: Int!
-
     direction: Int!
-
     firstRouteStop: [RouteStop!]!
-
     lastRouteStop: [RouteStop!]!
-
     routeStops: [RouteStop!]!
-
     connections: [Connection!]!
-
     line: Line!
 }
 
 type RouteStop {
     route: Route!
-
     stop: Stop!
-
     index: Int!
-
     served: [RouteStop!]!
 }
 
 input PacketFilters {
     offset: Int
-
     limit: Int
-
     activeAfter: Date
-
     activeBefore: Date
-
     code: Int
-
     valid: Boolean
 }
 
 type Packet {
     id: ID!
-
     activeFrom: Date!
-
     activeTo: Date!
-
     code: Int!
-
     valid: Boolean!
-
     lines: [Line!]!
 }
 
 input LineFilters {
     offset: Int
-
     limit: Int
-
-    packetId: Int
+    forDate: Date
 }
 
 type Line {
     id: ID!
-
     shortCode: String!
-
     fullCode: Int!
-
     packet: Packet!
-
     routes: [Route!]!
 }
 
 input ConnectionFilters {
     offset: Int
-
     limit: Int
-
     routeId: Int
-
     packetId: Int
+    forDate: Date
 }
 
 type Connection {
     id: ID!
-
-    route: [Route!]!
-
+    route: Route!
     number: Int!
-
     departures: [Departure!]!
-
     connectionRules: [ConnectionRule!]!
 }
 
 input DepartureFilters {
     offset: Int
-
     limit: Int
-
     connectionId: Int
-
     index: Int
-
     after: Time
-
     before: Time
-
-    packetId: Int
+    stopId: Int
+    forDate: Date
 }
 
 type Departure {
     id: ID!
-
-    time: Time
-
+    time: Time!
     connection: Connection!
 }
 
 type ConnectionRule {
     connection: Connection!
-
     rule: Rule!
 }
 
 input RuleFilters {
     limit: Int
-
     offset: Int
 }
 
 type Rule {
     id: ID!
-
     description: String!
-
     connectionRules: [ConnectionRule!]!
-}
-
-schema {
-    query: Query
 }

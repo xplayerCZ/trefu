@@ -6,8 +6,8 @@ import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.domain.*
 import cz.davidkurzica.trefu.domain.repository.RouteRepository
 import cz.davidkurzica.trefu.domain.repository.StopRepository
+import cz.davidkurzica.trefu.domain.util.ErrorMessage
 import cz.davidkurzica.trefu.domain.util.Result
-import cz.davidkurzica.trefu.util.ErrorMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -143,10 +143,10 @@ class TimetablesViewModel(
     }
 
     private suspend fun updateStops() {
-        val result = stopRepository.getStopOptions()
+        val result = stopRepository.getStopOptions(forDate = LocalDate.now())
         viewModelState.update {
             when (result) {
-                is Result.Success -> it.copy(stops = result.data)
+                is Result.Success -> it.copy(stops = result.data.sortedBy { stop -> stop.name })
                 is Result.Error -> {
                     val errorMessages = it.errorMessages + ErrorMessage(
                         id = UUID.randomUUID().mostSignificantBits,

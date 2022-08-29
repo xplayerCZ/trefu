@@ -6,10 +6,11 @@ import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.domain.ConnectionSet
 import cz.davidkurzica.trefu.domain.StopOption
 import cz.davidkurzica.trefu.domain.repository.StopRepository
+import cz.davidkurzica.trefu.domain.util.ErrorMessage
 import cz.davidkurzica.trefu.domain.util.Result
-import cz.davidkurzica.trefu.util.ErrorMessage
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.LocalTime
 import java.util.*
 
@@ -136,11 +137,11 @@ class ConnectionsViewModel(
         viewModelState.update { it.copy(isFormLoading = true) }
 
         viewModelScope.launch {
-            val result = stopRepository.getStopOptions()
+            val result = stopRepository.getStopOptions(forDate = LocalDate.now())
             viewModelState.update {
                 when (result) {
                     is Result.Success -> it.copy(
-                        stops = result.data,
+                        stops = result.data.sortedBy { stop -> stop.name },
                         isFormLoading = false
                     )
                     is Result.Error -> {

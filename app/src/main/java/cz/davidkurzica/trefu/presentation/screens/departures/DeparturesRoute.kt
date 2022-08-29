@@ -19,7 +19,7 @@ fun DeparturesRoute(
 
     DeparturesRoute(
         uiState = uiState,
-        onFormSubmit = { departuresViewModel.submitForm() },
+        onFormSubmit = { stopId, after -> departuresViewModel.submitForm(stopId, after) },
         onFormRefresh = { departuresViewModel.refreshForm() },
         onStopChange = { departuresViewModel.updateStop(it) },
         onTimeChange = { departuresViewModel.updateTime(it) },
@@ -33,7 +33,7 @@ fun DeparturesRoute(
 @Composable
 fun DeparturesRoute(
     uiState: DeparturesUiState,
-    onFormSubmit: () -> Unit,
+    onFormSubmit: (Int, LocalTime) -> Unit,
     onFormRefresh: () -> Unit,
     onStopChange: (StopOption) -> Unit,
     onTimeChange: (LocalTime) -> Unit,

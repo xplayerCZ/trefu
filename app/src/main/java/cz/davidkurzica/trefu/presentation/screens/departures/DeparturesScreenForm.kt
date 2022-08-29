@@ -25,7 +25,7 @@ enum class DeparturesFocusState {
 @Composable
 fun FormScreen(
     uiState: DeparturesUiState.Form,
-    onFormSubmit: () -> Unit,
+    onFormSubmit: (Int, LocalTime) -> Unit,
     onFormRefresh: () -> Unit,
     onStopChange: (StopOption) -> Unit,
     onTimeChange: (LocalTime) -> Unit,
@@ -78,7 +78,7 @@ fun FormScreen(
 private fun DeparturesScreenWithForm(
     uiState: DeparturesUiState.Form,
     onErrorDismiss: (Long) -> Unit,
-    onFormSubmit: () -> Unit,
+    onFormSubmit: (Int, LocalTime) -> Unit,
     onFormRefresh: () -> Unit,
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState,
@@ -126,7 +126,7 @@ private fun DeparturesScreenWithForm(
 fun DeparturesScreenLoading(
     scaffoldState: ScaffoldState,
     openDrawer: () -> Unit,
-    onFormSubmit: () -> Unit,
+    onFormSubmit: (Int, LocalTime) -> Unit,
     uiState: DeparturesUiState.Form,
 ) {
     DeparturesTopAppBarScreen(
@@ -143,7 +143,7 @@ fun DeparturesScreenLoading(
 fun DeparturesTopAppBarScreen(
     scaffoldState: ScaffoldState,
     openDrawer: () -> Unit,
-    onFormSubmit: () -> Unit,
+    onFormSubmit: (Int, LocalTime) -> Unit,
     uiState: DeparturesUiState.Form,
     body: @Composable (Modifier) -> Unit,
 ) {
@@ -161,7 +161,7 @@ fun DeparturesTopAppBarScreen(
         floatingActionButton = {
             if (uiState is DeparturesUiState.Form.HasData) {
                 FloatingActionButton(
-                    onClick = onFormSubmit,
+                    onClick = { onFormSubmit(uiState.selectedStop.id, uiState.selectedTime) },
                     backgroundColor = MaterialTheme.colors.primary
                 ) {
                     Icon(

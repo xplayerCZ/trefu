@@ -47,12 +47,12 @@ fun DepartureItem(
             Row {
                 val formatter = DateTimeFormatter.ofPattern("HH:mm")
                 Text(
-                    text = formatter.format(departureWithLine.time),
+                    text = departureWithLine.lineShortCode,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(Modifier.size(16.dp))
                 Text(
-                    text = departureWithLine.lineShortCode,
+                    text = formatter.format(departureWithLine.time),
                     fontWeight = FontWeight.Bold
                 )
             }

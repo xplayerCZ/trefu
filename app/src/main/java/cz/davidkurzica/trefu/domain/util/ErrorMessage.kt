@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.util
+package cz.davidkurzica.trefu.domain.util
 
 import androidx.annotation.StringRes
 

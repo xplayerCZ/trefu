@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.domain.DepartureWithLine
 import cz.davidkurzica.trefu.domain.StopOption
+import cz.davidkurzica.trefu.domain.repository.DepartureRepository
 import cz.davidkurzica.trefu.domain.repository.StopRepository
+import cz.davidkurzica.trefu.domain.util.ErrorMessage
 import cz.davidkurzica.trefu.domain.util.Result
-import cz.davidkurzica.trefu.util.ErrorMessage
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.LocalTime
 import java.util.*
 
@@ -105,6 +107,7 @@ private data class DeparturesViewModelState(
 
 class DeparturesViewModel(
     private val stopRepository: StopRepository,
+    private val departureRepository: DepartureRepository,
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(DeparturesViewModelState())
@@ -133,12 +136,12 @@ class DeparturesViewModel(
         viewModelState.update { it.copy(isFormLoading = true) }
 
         viewModelScope.launch {
-            val result = stopRepository.getStopOptions()
+            val result = stopRepository.getStopOptions(forDate = LocalDate.now())
 
             viewModelState.update {
                 when (result) {
                     is Result.Success -> it.copy(
-                        stops = result.data,
+                        stops = result.data.sortedBy { stop -> stop.name },
                         isFormLoading = false
                     )
                     is Result.Error -> {
@@ -153,12 +156,19 @@ class DeparturesViewModel(
         }
     }
 
-    fun submitForm() {
+    fun submitForm(
+        stopId: Int,
+        after: LocalTime,
+    ) {
         viewModelState.update { it.copy(showResults = true, isResultsLoading = true) }
 
         viewModelScope.launch {
-            val result =
-                Result.Success(listOf<DepartureWithLine>()) as Result<List<DepartureWithLine>>
+            val result = departureRepository.getDepartures(
+                limit = 15,
+                stopId = stopId,
+                after = after,
+                forDate = LocalDate.now()
+            )
             viewModelState.update {
                 when (result) {
                     is Result.Success -> it.copy(

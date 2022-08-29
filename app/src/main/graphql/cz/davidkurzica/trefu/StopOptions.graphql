@@ -1,5 +1,5 @@
-query StopOptions {
-    stops {
+query StopOptions($filter: StopFilters) {
+    stops(filter: $filter) {
         id
         name
     }
