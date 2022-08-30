@@ -6,12 +6,14 @@ import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.domain.*
 import cz.davidkurzica.trefu.domain.repository.RouteRepository
 import cz.davidkurzica.trefu.domain.repository.StopRepository
+import cz.davidkurzica.trefu.domain.repository.TimetableRepository
 import cz.davidkurzica.trefu.domain.util.ErrorMessage
 import cz.davidkurzica.trefu.domain.util.Result
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalTime
 import java.util.*
 
 sealed interface TimetablesUiState {
@@ -116,6 +118,7 @@ private data class TimetablesViewModelState(
 }
 
 class TimetablesViewModel(
+    private val timetableRepository: TimetableRepository,
     private val stopRepository: StopRepository,
     private val routeRepository: RouteRepository,
 ) : ViewModel() {
@@ -172,6 +175,7 @@ class TimetablesViewModel(
                         lines = routes.map { route -> route.line }.distinct(),
                         directions = routes.map { route -> route.direction },
                         selectedLine = null,
+                        selectedDirection = null,
                     )
                 }
                 is Result.Error -> {
@@ -185,17 +189,22 @@ class TimetablesViewModel(
         }
     }
 
-    fun submitForm() {
+    fun submitForm(
+        stopId: Int,
+        routeId: Int,
+        lineShortCode: String,
+    ) {
         viewModelState.update { it.copy(showResults = true, isLoading = true) }
 
         viewModelScope.launch {
-            val result = Result.Success(
-                Timetable(
-                    date = LocalDate.now(),
-                    lineShortCode = "208",
-                    departures = listOf()
-                )
-            ) as Result<Timetable>
+            val result = timetableRepository.getTimetable(
+                forDate = LocalDate.now(),
+                after = LocalTime.MIDNIGHT,
+                stopId = stopId,
+                routeId = routeId,
+                lineShortCode = lineShortCode,
+            )
+
             viewModelState.update {
                 when (result) {
                     is Result.Success -> it.copy(timetables = result.data, isLoading = false)

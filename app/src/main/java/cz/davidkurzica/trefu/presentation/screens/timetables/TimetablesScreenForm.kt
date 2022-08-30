@@ -27,7 +27,7 @@ enum class TimetablesFocusState {
 @Composable
 fun FormScreen(
     uiState: TimetablesUiState.Form,
-    onFormSubmit: () -> Unit,
+    onFormSubmit: (Int, Int, String) -> Unit,
     onFormRefresh: () -> Unit,
     onDirectionChange: (RouteDirection) -> Unit,
     onLineChange: (Line) -> Unit,
@@ -92,7 +92,7 @@ fun FormScreen(
 private fun TimetablesScreenWithForm(
     uiState: TimetablesUiState.Form,
     onErrorDismiss: (Long) -> Unit,
-    onFormSubmit: () -> Unit,
+    onFormSubmit: (Int, Int, String) -> Unit,
     onFormRefresh: () -> Unit,
     openDrawer: () -> Unit,
     scaffoldState: ScaffoldState,
@@ -140,7 +140,7 @@ private fun TimetablesScreenWithForm(
 fun TimetablesScreenLoading(
     scaffoldState: ScaffoldState,
     openDrawer: () -> Unit,
-    onFormSubmit: () -> Unit,
+    onFormSubmit: (Int, Int, String) -> Unit,
     uiState: TimetablesUiState.Form,
 ) {
     TimetablesTopAppBarScreen(
@@ -157,7 +157,7 @@ fun TimetablesScreenLoading(
 fun TimetablesTopAppBarScreen(
     scaffoldState: ScaffoldState,
     openDrawer: () -> Unit,
-    onFormSubmit: () -> Unit,
+    onFormSubmit: (Int, Int, String) -> Unit,
     uiState: TimetablesUiState.Form,
     body: @Composable (Modifier) -> Unit,
 ) {
@@ -175,7 +175,13 @@ fun TimetablesTopAppBarScreen(
         floatingActionButton = {
             if (uiState is TimetablesUiState.Form.HasData) {
                 FloatingActionButton(
-                    onClick = onFormSubmit,
+                    onClick = {
+                        onFormSubmit(
+                            uiState.selectedStop.id,
+                            uiState.selectedDirection.routeId,
+                            uiState.selectedLine.shortCode,
+                        )
+                    },
                     backgroundColor = MaterialTheme.colors.primary
                 ) {
                     Icon(

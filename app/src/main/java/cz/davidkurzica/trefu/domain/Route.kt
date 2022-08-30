@@ -9,5 +9,6 @@ data class Route(
 
 @Serializable
 data class RouteDirection(
+    val routeId: Int,
     val description: String,
 )

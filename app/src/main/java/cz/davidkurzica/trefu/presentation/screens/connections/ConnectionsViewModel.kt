@@ -64,18 +64,17 @@ private data class ConnectionsViewModelState(
     val selectedTime: LocalTime = LocalTime.now(),
     val stops: List<StopOption> = emptyList(),
     val connectionSets: List<ConnectionSet> = emptyList(),
-    val isFormLoading: Boolean = false,
-    val isResultsLoading: Boolean = false,
+    val isLoading: Boolean = false,
     val showResults: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
 ) {
 
     fun toUiState(): ConnectionsUiState =
         if (!showResults) {
-            if (isFormLoading || stops.isEmpty()) {
+            if (isLoading || stops.isEmpty()) {
                 ConnectionsUiState.Form.NoData(
                     isResultsOpen = showResults,
-                    isLoading = isFormLoading,
+                    isLoading = isLoading,
                     errorMessages = errorMessages
                 )
             } else {
@@ -85,22 +84,22 @@ private data class ConnectionsViewModelState(
                     selectedTime = selectedTime,
                     stops = stops,
                     isResultsOpen = showResults,
-                    isLoading = isFormLoading,
+                    isLoading = isLoading,
                     errorMessages = errorMessages
                 )
             }
         } else {
-            if (isResultsLoading) {
+            if (isLoading) {
                 ConnectionsUiState.Results.NoResults(
                     isResultsOpen = showResults,
-                    isLoading = isFormLoading,
+                    isLoading = isLoading,
                     errorMessages = errorMessages
                 )
             } else {
                 ConnectionsUiState.Results.HasResults(
                     connectionSets = connectionSets,
                     isResultsOpen = showResults,
-                    isLoading = isFormLoading,
+                    isLoading = isLoading,
                     errorMessages = errorMessages
                 )
             }
@@ -134,7 +133,7 @@ class ConnectionsViewModel(
     }
 
     fun loadForm() {
-        viewModelState.update { it.copy(isFormLoading = true) }
+        viewModelState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
             val result = stopRepository.getStopOptions(forDate = LocalDate.now())
@@ -142,14 +141,14 @@ class ConnectionsViewModel(
                 when (result) {
                     is Result.Success -> it.copy(
                         stops = result.data.sortedBy { stop -> stop.name },
-                        isFormLoading = false
+                        isLoading = false
                     )
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
                             messageId = R.string.load_error
                         )
-                        it.copy(errorMessages = errorMessages, isFormLoading = false)
+                        it.copy(errorMessages = errorMessages, isLoading = false)
                     }
                 }
             }
@@ -157,7 +156,7 @@ class ConnectionsViewModel(
     }
 
     fun submitForm() {
-        viewModelState.update { it.copy(showResults = true, isResultsLoading = true) }
+        viewModelState.update { it.copy(showResults = true, isLoading = true) }
 
         viewModelScope.launch {
             val result = Result.Success(listOf<ConnectionSet>()) as Result<List<ConnectionSet>>
@@ -165,14 +164,14 @@ class ConnectionsViewModel(
                 when (result) {
                     is Result.Success -> it.copy(
                         connectionSets = result.data,
-                        isResultsLoading = false
+                        isLoading = false
                     )
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
                             messageId = R.string.load_error
                         )
-                        it.copy(errorMessages = errorMessages, isResultsLoading = false)
+                        it.copy(errorMessages = errorMessages, isLoading = false)
                     }
                 }
             }

@@ -63,18 +63,17 @@ private data class DeparturesViewModelState(
     val selectedStop: StopOption? = null,
     val stops: List<StopOption> = emptyList(),
     val departureWithLines: List<DepartureWithLine> = emptyList(),
-    val isFormLoading: Boolean = false,
-    val isResultsLoading: Boolean = false,
+    val isLoading: Boolean = false,
     val showResults: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
 ) {
 
     fun toUiState(): DeparturesUiState =
         if (!showResults) {
-            if (isFormLoading || stops.isEmpty()) {
+            if (isLoading || stops.isEmpty()) {
                 DeparturesUiState.Form.NoData(
                     isResultsOpen = showResults,
-                    isLoading = isFormLoading,
+                    isLoading = isLoading,
                     errorMessages = errorMessages
                 )
             } else {
@@ -83,22 +82,22 @@ private data class DeparturesViewModelState(
                     selectedStop = selectedStop ?: stops[0],
                     stops = stops,
                     isResultsOpen = showResults,
-                    isLoading = isFormLoading,
+                    isLoading = isLoading,
                     errorMessages = errorMessages
                 )
             }
         } else {
-            if (isResultsLoading) {
+            if (isLoading) {
                 DeparturesUiState.Results.NoResults(
                     isResultsOpen = showResults,
-                    isLoading = isFormLoading,
+                    isLoading = isLoading,
                     errorMessages = errorMessages
                 )
             } else {
                 DeparturesUiState.Results.HasResults(
                     departureWithLines = departureWithLines,
                     isResultsOpen = showResults,
-                    isLoading = isFormLoading,
+                    isLoading = isLoading,
                     errorMessages = errorMessages
                 )
             }
@@ -133,7 +132,7 @@ class DeparturesViewModel(
     }
 
     fun loadForm() {
-        viewModelState.update { it.copy(isFormLoading = true) }
+        viewModelState.update { it.copy(isLoading = true) }
 
         viewModelScope.launch {
             val result = stopRepository.getStopOptions(forDate = LocalDate.now())
@@ -142,14 +141,14 @@ class DeparturesViewModel(
                 when (result) {
                     is Result.Success -> it.copy(
                         stops = result.data.sortedBy { stop -> stop.name },
-                        isFormLoading = false
+                        isLoading = false
                     )
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
                             messageId = R.string.load_error
                         )
-                        it.copy(errorMessages = errorMessages, isFormLoading = false)
+                        it.copy(errorMessages = errorMessages, isLoading = false)
                     }
                 }
             }
@@ -160,7 +159,7 @@ class DeparturesViewModel(
         stopId: Int,
         after: LocalTime,
     ) {
-        viewModelState.update { it.copy(showResults = true, isResultsLoading = true) }
+        viewModelState.update { it.copy(showResults = true, isLoading = true) }
 
         viewModelScope.launch {
             val result = departureRepository.getDepartures(
@@ -173,14 +172,14 @@ class DeparturesViewModel(
                 when (result) {
                     is Result.Success -> it.copy(
                         departureWithLines = result.data,
-                        isResultsLoading = false
+                        isLoading = false
                     )
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
                             messageId = R.string.load_error
                         )
-                        it.copy(errorMessages = errorMessages, isResultsLoading = false)
+                        it.copy(errorMessages = errorMessages, isLoading = false)
                     }
                 }
             }

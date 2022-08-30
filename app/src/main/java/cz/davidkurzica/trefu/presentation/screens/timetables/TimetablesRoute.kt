@@ -20,7 +20,13 @@ fun TimetablesRoute(
 
     TimetablesRoute(
         uiState = uiState,
-        onFormSubmit = { timetablesViewModel.submitForm() },
+        onFormSubmit = { stopId, routeId, lineShortCode ->
+            timetablesViewModel.submitForm(
+                stopId,
+                routeId,
+                lineShortCode
+            )
+        },
         onLineChange = { timetablesViewModel.updateLine(it) },
         onStopChange = { timetablesViewModel.updateStop(it) },
         onDirectionChange = { timetablesViewModel.updateDirection(it) },
@@ -35,7 +41,7 @@ fun TimetablesRoute(
 @Composable
 fun TimetablesRoute(
     uiState: TimetablesUiState,
-    onFormSubmit: () -> Unit,
+    onFormSubmit: (Int, Int, String) -> Unit,
     onFormRefresh: () -> Unit,
     onLineChange: (Line) -> Unit,
     onStopChange: (StopOption) -> Unit,

@@ -8,6 +8,6 @@ import cz.davidkurzica.trefu.domain.RouteDirection
 fun RouteOptionsQuery.Route.toRoute(): Route {
     return Route(
         line = Line(this.line.shortCode),
-        direction = RouteDirection(this.lastRouteStop.first().stop.name)
+        direction = RouteDirection(this.id.toInt(), this.lastRouteStop.first().stop.name)
     )
 }

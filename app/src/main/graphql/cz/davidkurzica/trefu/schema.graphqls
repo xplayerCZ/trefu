@@ -15,7 +15,10 @@ type Query {
     rule(id: ID!): Rule!
 }
 
+"""Date custom scalar type"""
 scalar Date
+
+"""Time custom scalar type"""
 scalar Time
 
 input StopFilters {
@@ -115,6 +118,8 @@ input DepartureFilters {
     after: Time
     before: Time
     stopId: Int
+    lineId: Int
+    routeId: Int
     forDate: Date
 }
 
