@@ -1,0 +1,18 @@
+query RouteOptions($stopId: ID!) {
+    stop(id: $stopId) {
+        routeStops {
+            route {
+                id
+                line {
+                    shortCode
+                    id
+                }
+                lastRouteStop {
+                    stop {
+                        name
+                    }
+                }
+            }
+        }
+    }
+}

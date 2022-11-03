@@ -1,0 +1,18 @@
+query TimetablesResult($filter: DepartureFilters) {
+    departures(filter: $filter) {
+        connection {
+            route {
+                id
+                line {
+                    shortCode
+                }
+                lastRouteStop {
+                    stop {
+                        name
+                    }
+                }
+            }
+        }
+        time
+    }
+}
