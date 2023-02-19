@@ -24,7 +24,7 @@ val appModule = module {
             .build()
 
         val apolloClient = ApolloClient.Builder()
-            .serverUrl("http://192.168.1.21:4000/graphql")
+            .serverUrl("https://trefu.davidkurzica.cz/graphql")
             .addHttpInterceptor(LoggingInterceptor(LoggingInterceptor.Level.BODY) {
                 Log.i(
                     "ApolloClient",
