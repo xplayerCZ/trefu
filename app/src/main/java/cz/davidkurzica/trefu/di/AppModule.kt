@@ -7,6 +7,10 @@ import com.apollographql.apollo3.network.okHttpClient
 import cz.davidkurzica.trefu.presentation.screens.connections.ConnectionsViewModel
 import cz.davidkurzica.trefu.presentation.screens.departures.DeparturesViewModel
 import cz.davidkurzica.trefu.presentation.screens.timetables.TimetablesViewModel
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.http.URLProtocol
 import okhttp3.OkHttpClient
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.dsl.module
@@ -35,6 +39,25 @@ val appModule = module {
             .build()
 
         return@single apolloClient
+    }
+
+    single {
+        val httpClient = HttpClient(OkHttp) {
+            defaultRequest {
+                url {
+                    protocol = URLProtocol.HTTP
+                    host = "localhost"
+                }
+            }
+            engine {
+                config {
+                    connectTimeout(10000, TimeUnit.MILLISECONDS)
+                    readTimeout(10000, TimeUnit.MILLISECONDS)
+                }
+            }
+        }
+
+        httpClient
     }
 
     viewModelOf(::ConnectionsViewModel)

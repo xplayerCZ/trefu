@@ -1,4 +1,4 @@
-package cz.davidkurzica.trefu.data.repository
+package cz.davidkurzica.trefu.data.repository.graphql
 
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Optional
