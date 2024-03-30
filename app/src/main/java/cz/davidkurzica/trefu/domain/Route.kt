@@ -10,5 +10,15 @@ data class Route(
 @Serializable
 data class RouteDirection(
     val routeId: Int,
-    val description: String,
+    val line: Line,
+    val direction: String,
+) {
+    val description = direction
+}
+
+@Serializable
+data class RouteDAO(
+    val routeId: Int,
+    val lineShortCode: String,
+    val lastStopName: String,
 )

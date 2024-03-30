@@ -164,7 +164,7 @@ class TimetablesViewModel(
     }
 
     private suspend fun updateRoutes(stopId: Int) {
-        val result = routeRepository.getRouteOptions(stopId)
+        val result = routeRepository.getRouteOptions(forDate = LocalDate.now(), stopId)
 
         viewModelState.update {
             when (result) {

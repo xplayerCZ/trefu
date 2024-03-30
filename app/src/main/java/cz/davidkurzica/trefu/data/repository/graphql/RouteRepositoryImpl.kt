@@ -6,11 +6,12 @@ import cz.davidkurzica.trefu.data.remote.RouteOptionsQuery
 import cz.davidkurzica.trefu.domain.Route
 import cz.davidkurzica.trefu.domain.repository.RouteRepository
 import cz.davidkurzica.trefu.domain.util.Result
+import java.time.LocalDate
 
 class RouteRepositoryImpl(
     private val apolloClient: ApolloClient,
 ) : RouteRepository {
-    override suspend fun getRouteOptions(stopId: Int): Result<List<Route>> {
+    override suspend fun getRouteOptions(forDate: LocalDate, stopId: Int): Result<List<Route>> {
         return try {
             Result.Success(
                 data = apolloClient

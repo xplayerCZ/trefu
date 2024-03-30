@@ -11,8 +11,8 @@ data class Timetable(
     val departures: List<DepartureSimple>,
 )
 
-data class TimetableFormData(
-    val selectedStop: StopOption,
-    val selectedLine: Line,
-    val selectedDirection: RouteDirection,
+@Serializable
+data class TimetableDAO(
+    val date: @Serializable(with = LocalDateSerializer::class) LocalDate,
+    val departures: List<DepartureSimple>,
 )

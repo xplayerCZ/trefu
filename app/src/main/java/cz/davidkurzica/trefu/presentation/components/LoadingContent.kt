@@ -1,9 +1,14 @@
 package cz.davidkurzica.trefu.presentation.components
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import androidx.compose.ui.Alignment
 
+
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun LoadingContent(
     empty: Boolean,
@@ -15,10 +20,17 @@ fun LoadingContent(
     if (empty) {
         emptyContent()
     } else {
-        SwipeRefresh(
-            state = rememberSwipeRefreshState(loading),
-            onRefresh = onRefresh,
-            content = content,
-        )
+        Box(
+            contentAlignment = Alignment.TopCenter,
+        ) {
+            PullRefreshIndicator(
+                refreshing = loading,
+                state = rememberPullRefreshState(
+                    refreshing = loading,
+                    onRefresh = onRefresh,
+                ),
+            )
+            if(!loading) content()
+        }
     }
 }

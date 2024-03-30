@@ -40,6 +40,7 @@ fun DepartureItem(
         elevation = 4.dp
     ) {
         Column(
+            verticalArrangement = Arrangement.spacedBy(2.dp),
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
@@ -57,7 +58,7 @@ fun DepartureItem(
                 )
             }
             Text(
-                text = "konečná: ${departureWithLine.stopName}",
+                text = "Direction: ${departureWithLine.stopName}",
                 fontSize = MaterialTheme.typography.caption.fontSize
             )
         }

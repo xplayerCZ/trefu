@@ -1,11 +1,7 @@
 package cz.davidkurzica.trefu.data.repository.rest
 
-import com.apollographql.apollo3.ApolloClient
-import com.apollographql.apollo3.api.Optional
-import cz.davidkurzica.trefu.data.mappers.toDepartureItem
-import cz.davidkurzica.trefu.data.remote.TimetablesResultQuery
-import cz.davidkurzica.trefu.data.remote.type.DepartureFilters
 import cz.davidkurzica.trefu.domain.Timetable
+import cz.davidkurzica.trefu.domain.TimetableDAO
 import cz.davidkurzica.trefu.domain.repository.TimetableRepository
 import cz.davidkurzica.trefu.domain.util.Result
 import io.ktor.client.HttpClient
@@ -33,7 +29,13 @@ class TimetableRepositoryImpl(
                     parameter("stopId", stopId)
                     parameter("routeId", routeId)
                     parameter("lineShortCode", lineShortCode)
-                }.body()
+                }.body<TimetableDAO>().let {
+                    Timetable(
+                        it.date,
+                        lineShortCode,
+                        it.departures
+                    )
+                }
             )
         } catch (e: Exception) {
             e.printStackTrace()

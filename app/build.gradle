@@ -75,23 +75,27 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
 
     implementation 'androidx.navigation:navigation-compose:2.7.7'
-    implementation 'androidx.window:window:1.1.0-alpha03'
+    implementation 'androidx.window:window:1.2.0'
 
     implementation "com.apollographql.apollo3:apollo-runtime:$apollo_version"
 
-    //implementation('com.squareup.sqldelight:gradle-plugin:1.5.3' )
-    implementation "com.squareup.sqldelight:android-driver:1.5.3"
+    implementation "com.squareup.sqldelight:android-driver:1.5.5"
 
     implementation "io.insert-koin:koin-android:$koin_version"
     implementation "io.insert-koin:koin-androidx-compose:$koin_version"
 
     implementation "io.ktor:ktor-client-core:$ktor_version"
+    implementation "io.ktor:ktor-client-logging:$ktor_version"
+    implementation "io.ktor:ktor-client-content-negotiation:$ktor_version"
     implementation "io.ktor:ktor-client-serialization:$ktor_version"
     implementation "io.ktor:ktor-client-okhttp:$ktor_version"
 
-    androidTestImplementation 'androidx.test:core:1.4.0'
-    androidTestImplementation 'androidx.test:rules:1.4.0'
-    androidTestImplementation 'androidx.test:runner:1.4.0'
+    implementation "io.ktor:ktor-serialization-kotlinx-json:$ktor_version"
+    testImplementation("org.slf4j:slf4j-simple:2.0.12")
+
+    androidTestImplementation 'androidx.test:core:1.5.0'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation "androidx.compose.ui:ui-test:$compose_version"
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
 }

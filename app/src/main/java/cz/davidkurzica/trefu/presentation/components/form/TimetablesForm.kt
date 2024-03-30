@@ -43,7 +43,7 @@ fun TimetablesForm(
             DirectionSelector(
                 selectedDirection = selectedDirection,
                 onSelectedDirectionChange = onDirectionChange,
-                directions
+                options = directions
             )
         }
     }

@@ -44,6 +44,9 @@ fun FocusableSelector(
         modifier = Modifier.clickable { onClick() },
         label = { Text(label) },
         enabled = false,
+        colors = TextFieldDefaults.textFieldColors(
+            disabledTextColor = MaterialTheme.colors.onPrimary,
+        )
     )
 }
 

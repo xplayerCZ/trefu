@@ -29,7 +29,8 @@ fun ErrorPage(
                 contentDescription = null
             )
             Spacer(Modifier.size(16.dp))
-            Text("Pri načítání dat došlo k chybě.")
+            Text("An unexpected error occurred.")
+            Text("Please try again later.")
         }
     }
 }

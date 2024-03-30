@@ -9,8 +9,12 @@ import cz.davidkurzica.trefu.presentation.screens.departures.DeparturesViewModel
 import cz.davidkurzica.trefu.presentation.screens.timetables.TimetablesViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.http.URLProtocol
+import io.ktor.serialization.kotlinx.json.json
 import okhttp3.OkHttpClient
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.dsl.module
@@ -43,10 +47,17 @@ val appModule = module {
 
     single {
         val httpClient = HttpClient(OkHttp) {
+            install(Logging) {
+                level = LogLevel.ALL
+            }
+            install(ContentNegotiation) {
+                json()
+            }
             defaultRequest {
                 url {
                     protocol = URLProtocol.HTTP
-                    host = "localhost"
+                    host = "10.0.2.2"
+                    port = 8080
                 }
             }
             engine {
