@@ -12,5 +12,5 @@ interface TimetableRepository {
         stopId: Int,
         routeId: Int,
         lineShortCode: String,
-    ): Result<Timetable>
+    ): Result<Timetable?>
 }

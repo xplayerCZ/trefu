@@ -1,6 +1,5 @@
 package cz.davidkurzica.trefu.presentation.screens.timetables
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
@@ -9,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import cz.davidkurzica.trefu.R
+import cz.davidkurzica.trefu.presentation.components.EmptyResult
 import cz.davidkurzica.trefu.presentation.components.FullScreenLoading
 import cz.davidkurzica.trefu.presentation.components.LoadingContent
 import cz.davidkurzica.trefu.presentation.components.TrefuSnackbarHost
@@ -80,7 +80,7 @@ private fun TimetablesScreenWithList(
                         contentModifier
                     )
                     is TimetablesUiState.Results.NoResults -> {
-                        Box(contentModifier.fillMaxSize()) { /* empty screen */ }
+                        EmptyResult(contentModifier.fillMaxSize())
                     }
                 }
             }

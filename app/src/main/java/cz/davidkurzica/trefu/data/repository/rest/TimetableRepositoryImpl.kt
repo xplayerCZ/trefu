@@ -20,7 +20,7 @@ class TimetableRepositoryImpl(
         stopId: Int,
         routeId: Int,
         lineShortCode: String,
-    ): Result<Timetable> {
+    ): Result<Timetable?> {
         return try {
             Result.Success(
                 data = httpClient.get("/routing/timetables") {
@@ -29,13 +29,16 @@ class TimetableRepositoryImpl(
                     parameter("stopId", stopId)
                     parameter("routeId", routeId)
                     parameter("lineShortCode", lineShortCode)
-                }.body<TimetableDAO>().let {
-                    Timetable(
-                        it.date,
-                        lineShortCode,
-                        it.departures
-                    )
                 }
+                    .body<TimetableDAO>()
+                    .takeIf { it.departures.isNotEmpty() }
+                    ?.let {
+                        Timetable(
+                            it.date,
+                            lineShortCode,
+                            it.departures
+                        )
+                    }
             )
         } catch (e: Exception) {
             e.printStackTrace()

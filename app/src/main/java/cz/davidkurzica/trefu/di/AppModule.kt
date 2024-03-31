@@ -55,9 +55,8 @@ val appModule = module {
             }
             defaultRequest {
                 url {
-                    protocol = URLProtocol.HTTP
-                    host = "10.0.2.2"
-                    port = 8080
+                    protocol = URLProtocol.HTTPS
+                    host = "trefu.davidkurzica.cz"
                 }
             }
             engine {

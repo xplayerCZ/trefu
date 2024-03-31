@@ -70,7 +70,7 @@ private data class DeparturesViewModelState(
 
     fun toUiState(): DeparturesUiState =
         if (!showResults) {
-            if (isLoading || stops.isEmpty()) {
+            if (isLoading || stops.isEmpty() || selectedStop == null) {
                 DeparturesUiState.Form.NoData(
                     isResultsOpen = showResults,
                     isLoading = isLoading,
@@ -79,7 +79,7 @@ private data class DeparturesViewModelState(
             } else {
                 DeparturesUiState.Form.HasData(
                     selectedTime = selectedTime,
-                    selectedStop = selectedStop ?: stops[0],
+                    selectedStop = selectedStop,
                     stops = stops,
                     isResultsOpen = showResults,
                     isLoading = isLoading,
@@ -87,7 +87,7 @@ private data class DeparturesViewModelState(
                 )
             }
         } else {
-            if (isLoading) {
+            if (isLoading || departureWithLines.isEmpty()) {
                 DeparturesUiState.Results.NoResults(
                     isResultsOpen = showResults,
                     isLoading = isLoading,
@@ -139,10 +139,14 @@ class DeparturesViewModel(
 
             viewModelState.update {
                 when (result) {
-                    is Result.Success -> it.copy(
-                        stops = result.data.sortedBy { stop -> stop.name },
-                        isLoading = false
-                    )
+                    is Result.Success -> {
+                        val sorted = result.data.sortedBy { stop -> stop.name }
+                        it.copy(
+                            stops = sorted,
+                            selectedStop = sorted.firstOrNull { stop -> stop.name == "Divadlo" } ?: sorted.first(),
+                            isLoading = false
+                        )
+                    }
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,

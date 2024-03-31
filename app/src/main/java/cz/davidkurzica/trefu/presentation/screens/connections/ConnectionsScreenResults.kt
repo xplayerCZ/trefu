@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import cz.davidkurzica.trefu.R
+import cz.davidkurzica.trefu.presentation.components.EmptyResult
 import cz.davidkurzica.trefu.presentation.components.FullScreenLoading
 import cz.davidkurzica.trefu.presentation.components.LoadingContent
 import cz.davidkurzica.trefu.presentation.components.TrefuSnackbarHost
@@ -80,31 +81,10 @@ private fun ConnectionsScreenWithList(
                         contentModifier
                     )
                     is ConnectionsUiState.Results.NoResults -> {
-                        Box(contentModifier.fillMaxSize()) { /* empty screen */ }
+                        EmptyResult(contentModifier.fillMaxSize())
                     }
                 }
             }
         )
     }
 }
-
-/*
-@Preview("ConnectionsFormPreview")
-@Composable
-fun ConnectionsFormPreview() {
-    val options = listOf(
-        Stop(1, "Albert", true),
-        Stop(2, "Englišova", true)
-    )
-
-    TrefuTheme(false) {
-        ConnectionsForm(
-            options = options,
-            selectedStop = options[0],
-            onSelectedTrackChange = { }
-        )
-    }
-}
-*/
-
-

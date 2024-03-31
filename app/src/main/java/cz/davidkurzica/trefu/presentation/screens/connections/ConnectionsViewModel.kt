@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import cz.davidkurzica.trefu.R
 import cz.davidkurzica.trefu.domain.ConnectionSet
 import cz.davidkurzica.trefu.domain.StopOption
+import cz.davidkurzica.trefu.domain.repository.ConnectionRepository
 import cz.davidkurzica.trefu.domain.repository.StopRepository
 import cz.davidkurzica.trefu.domain.util.ErrorMessage
 import cz.davidkurzica.trefu.domain.util.Result
@@ -71,7 +72,7 @@ private data class ConnectionsViewModelState(
 
     fun toUiState(): ConnectionsUiState =
         if (!showResults) {
-            if (isLoading || stops.isEmpty()) {
+            if (isLoading || stops.isEmpty() || selectedFromStop == null || selectedToStop == null) {
                 ConnectionsUiState.Form.NoData(
                     isResultsOpen = showResults,
                     isLoading = isLoading,
@@ -79,8 +80,8 @@ private data class ConnectionsViewModelState(
                 )
             } else {
                 ConnectionsUiState.Form.HasData(
-                    selectedFromStop = selectedFromStop ?: stops.first(),
-                    selectedToStop = selectedToStop ?: stops.first(),
+                    selectedFromStop = selectedFromStop,
+                    selectedToStop = selectedToStop,
                     selectedTime = selectedTime,
                     stops = stops,
                     isResultsOpen = showResults,
@@ -89,7 +90,7 @@ private data class ConnectionsViewModelState(
                 )
             }
         } else {
-            if (isLoading) {
+            if (isLoading || connectionSets.isEmpty()) {
                 ConnectionsUiState.Results.NoResults(
                     isResultsOpen = showResults,
                     isLoading = isLoading,
@@ -108,11 +109,13 @@ private data class ConnectionsViewModelState(
 
 class ConnectionsViewModel(
     private val stopRepository: StopRepository,
+    private val connectionRepository: ConnectionRepository,
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(ConnectionsViewModelState())
 
     val uiState = viewModelState
+        .onEach { println(it) }
         .map { it.toUiState() }
         .stateIn(
             viewModelScope,
@@ -139,10 +142,15 @@ class ConnectionsViewModel(
             val result = stopRepository.getStopOptions(forDate = LocalDate.now())
             viewModelState.update {
                 when (result) {
-                    is Result.Success -> it.copy(
-                        stops = result.data.sortedBy { stop -> stop.name },
-                        isLoading = false
-                    )
+                    is Result.Success -> {
+                        val sorted = result.data.sortedBy { stop -> stop.name }
+                        it.copy(
+                            stops = sorted,
+                            selectedFromStop = sorted.firstOrNull(),
+                            selectedToStop = sorted.lastOrNull(),
+                            isLoading = false
+                        )
+                    }
                     is Result.Error -> {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
@@ -159,7 +167,11 @@ class ConnectionsViewModel(
         viewModelState.update { it.copy(showResults = true, isLoading = true) }
 
         viewModelScope.launch {
-            val result = Result.Success(listOf<ConnectionSet>()) as Result<List<ConnectionSet>>
+            val result = connectionRepository.getConnectionSets(
+                fromStopId = viewModelState.value.selectedFromStop?.id ?: error("From stop not selected"),
+                toStopId = viewModelState.value.selectedToStop?.id ?: error("To stop not selected"),
+                after = viewModelState.value.selectedTime
+            )
             viewModelState.update {
                 when (result) {
                     is Result.Success -> it.copy(
